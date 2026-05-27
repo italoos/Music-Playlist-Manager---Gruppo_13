@@ -1,1 +1,4 @@
 # Music-Playlist-Manager---Gruppo_13
+
+Link documentazione
+https://docs.google.com/document/d/1mK8qz29VPsl5JwhbeG5ZsWCupk9c0DmwGXdaEHqHIgY/edit?usp=sharing
