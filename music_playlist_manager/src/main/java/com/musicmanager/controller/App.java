@@ -1,4 +1,4 @@
-package com.musicmanager;
+package com.musicmanager.controller;
 
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
