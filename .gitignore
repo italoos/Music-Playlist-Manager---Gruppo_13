@@ -1,0 +1,5 @@
+# Database locale H2
+
+data/
+*.mv.db
+*.trace.db
