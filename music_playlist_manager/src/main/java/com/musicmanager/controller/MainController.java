@@ -1,6 +1,72 @@
-package com.musicmanager;
+package com.musicmanager.controller;
+
+import com.musicmanager.model.Track;
+import com.musicmanager.repository.TrackRepository;
+import com.musicmanager.repository.TrackRepositoryImpl;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.fxml.FXML;
 
 public class MainController {
+
+    private final CommandManager commandManager = new CommandManager();
+    private final TrackRepository trackRepository = new TrackRepositoryImpl();
+
+    private final ObservableList<Track> tracks = FXCollections.observableArrayList();
+
+    /** Gestisce la modifica di un brano musicale. */
+
+    @FXML
+    public void handleUpdateTrack(Track track, Track updatedTrack) {
+
+        if (track == null || updatedTrack == null) {
+            System.out.println("[MAIN CONTROLLER] WARNING: Cannot update track (invalid input).");
+            return;
+        }
+
+        track.setTitle(updatedTrack.getTitle());
+        track.setAuthor(updatedTrack.getAuthor());
+        track.setLength(updatedTrack.getLength());
+        track.setGenre(updatedTrack.getGenre());
+        track.setYear(updatedTrack.getYear());
+
+        int index = tracks.indexOf(track);
+
+        if (index != -1) {
+            tracks.set(index, track);
+        }
+
+        trackRepository.update(track);
+
+        System.out.println("[MAIN CONTROLLER] INFO: Track updated successfully (ID: " + track.getId() + ").");
+
+    }
+
+    /** Gestisce la rimozione di un brano musicale. */
+
+    @FXML
+    public void handleDeleteTrack(Track track) {
+
+        if (track == null) {
+            System.out.println("[MAIN CONTROLLER] WARNING: No track selected for deletion.");
+            return;
+        }
+
+        Command command = new RemoveTrackCommand(track, trackRepository, tracks);
+        commandManager.executeCommand(command);
+
+    }
+
+    /** Ripristina lo stato precedente annullando l'ultima operazione. */
+
+    @FXML
+    public void handleUndo() {
+        commandManager.undoLastCommand();
+    }
+
+    public ObservableList<Track> getTracks() {
+        return tracks;
+    }
 
     /*
     // TO DO:
@@ -144,7 +210,7 @@ public class MainController {
     }
     */
 
-    public void handleUndo() {
+    // public void handleUndo() {
 
         // TO DO:
         // Recuperare ultimo comando eseguito
@@ -154,5 +220,5 @@ public class MainController {
 
         // TO DO:
         // Aggiornare GUI e stato applicazione
-    }
+    // }
 }
