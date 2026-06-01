@@ -1,43 +1,36 @@
 package com.musicmanager;
 
-import java.io.IOException;
-
 import javafx.application.Application;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.stage.Stage;
 
-import java.io.IOException;
-
-import com.musicmanager.database.DatabaseManager;
-
-/**
- * JavaFX App
- */
 public class App extends Application {
 
-    private static Scene scene;
-
     @Override
-    public void start(Stage stage) throws IOException {
-        scene = new Scene(loadFXML("primary"), 640, 480);
-        stage.setScene(scene);
-        stage.show();
-    }
+    public void start(Stage primaryStage) {
 
-    static void setRoot(String fxml) throws IOException {
-        scene.setRoot(loadFXML(fxml));
-    }
+        PlaybackEngine playbackEngine = PlaybackEngine.getInstance();
 
-    private static Parent loadFXML(String fxml) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource(fxml + ".fxml"));
-        return fxmlLoader.load();
+        Track defaultTrack = new Track(
+        "Default Song",
+        "Test Artist",
+        180,
+        "Pop",
+        2024
+);
+
+       playbackEngine.setCurrentTrack(defaultTrack);
+
+        MediaPlayerUI view = new MediaPlayerUI(primaryStage);
+
+        MainController controller =
+                new MainController(playbackEngine, view);
+
+        view.setController(controller);
+
+        playbackEngine.registerObserver(view);
     }
 
     public static void main(String[] args) {
-        DatabaseManager.initializeDatabase();
-        launch();
+        launch(args);
     }
-
 }

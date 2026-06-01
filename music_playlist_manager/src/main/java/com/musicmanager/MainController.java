@@ -2,7 +2,6 @@ package com.musicmanager;
 
 public class MainController {
 
-    /*
     // TO DO:
     // Verificare se PlaybackEngine deve essere gestito come Singleton
     // oppure passato tramite dependency injection nel costruttore
@@ -13,6 +12,7 @@ public class MainController {
     // e registrare eventuali listener/event handler
     private MediaPlayerUI view;
 
+    /*
     // TO DO:
     // Gestire storico dei comandi per supportare Undo
     private CommandManager commandManager;
@@ -24,13 +24,17 @@ public class MainController {
     // TO DO:
     // Implementare persistenza delle playlist nel database locale
     private PlaylistRepository playlistRepository;
+    */
 
     public MainController(
             PlaybackEngine playbackEngine,
-            MediaPlayerUI view,
+            MediaPlayerUI view
+            /*
+            ,
             CommandManager commandManager,
             TrackRepository trackRepo,
             PlaylistRepository playlistRepo
+            */
     ) {
 
         // TO DO:
@@ -39,17 +43,27 @@ public class MainController {
 
         this.playbackEngine = playbackEngine;
         this.view = view;
+
+        /*
         this.commandManager = commandManager;
         this.trackRepository = trackRepo;
         this.playlistRepository = playlistRepo;
+        */
     }
-    */
 
     public void handlePlay() {
 
         // TO DO:
         // Avviare la riproduzione della traccia corrente
         // tramite PlaybackEngine
+        Track currentTrack = playbackEngine.getCurrentTrack();
+
+        if (currentTrack == null) {
+            view.showMessage("Nessuna traccia selezionata");
+            return;
+        }
+
+        playbackEngine.play();
 
         // TO DO:
         // Aggiornare la GUI dopo l'avvio del playback
@@ -61,11 +75,14 @@ public class MainController {
 
     public void handlePause() {
 
-        // TO DO:
-        // Mettere in pausa la riproduzione corrente
+        Track currentTrack = playbackEngine.getCurrentTrack();
 
-        // TO DO:
-        // Aggiornare lo stato della GUI
+        if (currentTrack == null) {
+            view.showMessage("Nessuna traccia in riproduzione");
+            return;
+        }
+
+        playbackEngine.pause();
     }
 
     public void handleSkip() {
@@ -76,6 +93,20 @@ public class MainController {
 
         // TO DO:
         // Aggiornare informazioni nella GUI
+    }
+
+    public void handleTogglePlayback() {
+
+        if (playbackEngine.getCurrentTrack() == null) {
+            view.showMessage("Nessuna traccia selezionata");
+            return;
+        }
+
+        if (playbackEngine.isPlaying()) {
+            playbackEngine.pause();
+        } else {
+            playbackEngine.play();
+        }
     }
 
     /*
