@@ -1,5 +1,23 @@
-# Database locale H2
-
+# --- Database locale H2 ---
 data/
 *.mv.db
 *.trace.db
+
+# --- Cartelle di Build (Maven / Gradle) ---
+target/
+build/
+.gradle/
+out/
+
+# --- Configurazioni degli IDE (IntelliJ IDEA, VS Code, Eclipse) ---
+.idea/
+.vscode/
+*.iml
+*.iws
+.classpath
+.project
+.settings/
+
+# --- File temporanei del Sistema Operativo ---
+.DS_Store
+Thumbs.db
