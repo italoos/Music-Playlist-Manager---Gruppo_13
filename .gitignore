@@ -1,5 +1,14 @@
-# Database locale H2
+# Ignora file testuale
+Music Playlist Manager.txt
 
+# Database locale H2
 data/
 *.mv.db
 *.trace.db
+
+# Compiled Java class files
+*.class
+
+# Build output
+/target/
+**/target/

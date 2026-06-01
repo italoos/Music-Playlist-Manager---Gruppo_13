@@ -3,8 +3,9 @@ module com.musicmanager {
     requires javafx.fxml;
     requires java.sql;
 
-    opens com.musicmanager to javafx.fxml;
+    exports com.musicmanager.controller;
+    opens com.musicmanager.controller to javafx.fxml;
     opens com.musicmanager.database to javafx.fxml;
-    exports com.musicmanager;
+    opens com.musicmanager.model to javafx.fxml;
     exports com.musicmanager.database;
 }
