@@ -1,14 +1,26 @@
 # Ignora file testuale
 Music Playlist Manager.txt
 
-# Database locale H2
+# --- Database locale H2 ---
 data/
 *.mv.db
 *.trace.db
 
-# Compiled Java class files
-*.class
+# --- Cartelle di Build (Maven / Gradle) ---
+target/
+build/
+.gradle/
+out/
 
-# Build output
-/target/
-**/target/
+# --- Configurazioni degli IDE (IntelliJ IDEA, VS Code, Eclipse) ---
+.idea/
+.vscode/
+*.iml
+*.iws
+.classpath
+.project
+.settings/
+
+# --- File temporanei del Sistema Operativo ---
+.DS_Store
+Thumbs.db
