@@ -1,6 +1,7 @@
 package com.musicmanager.repository;
 
 import com.musicmanager.model.Track;
+import java.util.List;
 
 /**
  * Interfaccia per la gestione e la persistenza dei dati relativi ai brani musicali.
@@ -11,6 +12,12 @@ import com.musicmanager.model.Track;
  */
 
 public interface TrackRepository {
+
+    /**
+     * Recupera tutti i brani presenti nel sistema di persistenza.
+     */
+
+    List<Track> findAll();
 
     /**
      * Inserisce un nuovo brano nel sistema di persistenza.
