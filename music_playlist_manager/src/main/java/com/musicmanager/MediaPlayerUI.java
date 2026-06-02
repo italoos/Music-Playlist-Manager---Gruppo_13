@@ -42,8 +42,6 @@ public class MediaPlayerUI implements PlaybackObserver {
         stage.setTitle("Music Manager");
         stage.setScene(scene);
         stage.show();
-
-        initDefaultTrack();
     }
 
     public void setController(MainController controller) {
@@ -88,21 +86,6 @@ public class MediaPlayerUI implements PlaybackObserver {
         );
 
         return root;
-    }
-
-    // Inizializzazione della traccia di default
-    private void initDefaultTrack() {
-
-        // TEST TRACK
-        Track defaultTrack = new Track(
-                "Default Song",
-                "Test Artist",
-                180,
-                "Pop",
-                2024
-        );
-
-        trackButton.setText("🎵 " + defaultTrack.getTitle());
     }
 
     //Update sulla base del pattern Observer con aggiornamento del MediaPlayer
