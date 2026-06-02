@@ -3,6 +3,7 @@ package com.musicmanager.controller;
 import com.musicmanager.model.Track;
 import com.musicmanager.repository.TrackRepository;
 import com.musicmanager.repository.TrackRepositoryImpl;
+import java.io.IOException;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -13,6 +14,30 @@ public class MainController {
     private final TrackRepository trackRepository = new TrackRepositoryImpl();
 
     private final ObservableList<Track> tracks = FXCollections.observableArrayList();
+
+    @FXML
+    private void switchToPrimary() throws IOException {
+        App.setRoot("primary");
+    }
+
+    @FXML
+    private void switchToSecondary() throws IOException {
+        switchToPrimary();
+    }
+
+    @FXML
+    private void initialize() {
+        loadTracksFromDatabase();
+    }
+
+    /**
+     * Recupera tutti i brani dal database e li rende disponibili alla GUI.
+     */
+
+    public void loadTracksFromDatabase() {
+        tracks.setAll(trackRepository.findAll());
+        System.out.println("[MAIN CONTROLLER] INFO: Tracks loaded from database (" + tracks.size() + ").");
+    }
 
     /** Gestisce la modifica di un brano musicale. */
 
