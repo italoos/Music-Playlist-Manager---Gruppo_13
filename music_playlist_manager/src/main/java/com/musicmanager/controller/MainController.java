@@ -4,13 +4,16 @@ import com.musicmanager.model.Track;
 import com.musicmanager.repository.TrackRepository;
 import com.musicmanager.repository.TrackRepositoryImpl;
 import java.io.IOException;
-import java.util.Collections;
-
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 
 public class MainController {
 
@@ -27,24 +30,43 @@ public class MainController {
         App.setRoot("primary");
     }
 
-
     @FXML
     private void initialize() {
+        tracksListView.setPlaceholder(new Label("I tuoi brani musicali saranno visualizzati qui"));
         tracksListView.setItems(tracks);
-        tracksListView.setCellFactory(listView -> new ListCell<>() {
-            @Override
-            protected void updateItem(Track track, boolean empty) {
-                super.updateItem(track, empty);
-
-                if (empty || track == null) {
-                    setText(null);
-                    return;
-                }
-
-                setText(track.getTitle() + " - " + track.getAuthor());
-            }
-        });
+        tracksListView.setCellFactory(listView -> new TrackListCell());
         loadTracksFromDatabase();
+    }
+
+    private class TrackListCell extends ListCell<Track> {
+
+        private final Label trackLabel = new Label();
+        private final Region spacer = new Region();
+        private final Button playButton = new Button("Play");
+        private final HBox content = new HBox(16, trackLabel, spacer, playButton);
+
+        private TrackListCell() {
+            HBox.setHgrow(spacer, Priority.ALWAYS);
+            trackLabel.setMaxWidth(Double.MAX_VALUE);
+            playButton.visibleProperty().bind(hoverProperty());
+            playButton.managedProperty().bind(playButton.visibleProperty());
+            playButton.setOnAction(event -> playTrack(getItem()));
+        }
+
+        @Override
+        protected void updateItem(Track track, boolean empty) {
+            super.updateItem(track, empty);
+
+            if (empty || track == null) {
+                setText(null);
+                setGraphic(null);
+                return;
+            }
+
+            trackLabel.setText(track.getTitle() + " - " + track.getAuthor() + " (" + track.getGenre() + ", " + track.getYear() + ")");
+            setText(null);
+            setGraphic(content);
+        }
     }
 
     /**
@@ -154,6 +176,18 @@ public class MainController {
     */
 
     public void handlePlay() {
+        playTrack(tracksListView.getSelectionModel().getSelectedItem());
+    }
+
+    private void playTrack(Track track) {
+
+        if (track == null) {
+            System.out.println("[MAIN CONTROLLER] WARNING: No track selected for playback.");
+            return;
+        }
+
+        tracksListView.getSelectionModel().select(track);
+        System.out.println("[MAIN CONTROLLER] INFO: Play requested for track: " + track.getTitle() + ".");
 
         // TO DO:
         // Avviare la riproduzione della traccia corrente
