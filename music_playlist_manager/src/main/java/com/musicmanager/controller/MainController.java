@@ -4,9 +4,13 @@ import com.musicmanager.model.Track;
 import com.musicmanager.repository.TrackRepository;
 import com.musicmanager.repository.TrackRepositoryImpl;
 import java.io.IOException;
+import java.util.Collections;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
 
 public class MainController {
 
@@ -16,17 +20,30 @@ public class MainController {
     private final ObservableList<Track> tracks = FXCollections.observableArrayList();
 
     @FXML
-    private void switchToPrimary() throws IOException {
+    private ListView<Track> tracksListView;
+
+    @FXML
+    private void loadPrimaryStage() throws IOException {
         App.setRoot("primary");
     }
 
-    @FXML
-    private void switchToSecondary() throws IOException {
-        switchToPrimary();
-    }
 
     @FXML
     private void initialize() {
+        tracksListView.setItems(tracks);
+        tracksListView.setCellFactory(listView -> new ListCell<>() {
+            @Override
+            protected void updateItem(Track track, boolean empty) {
+                super.updateItem(track, empty);
+
+                if (empty || track == null) {
+                    setText(null);
+                    return;
+                }
+
+                setText(track.getTitle() + " - " + track.getAuthor());
+            }
+        });
         loadTracksFromDatabase();
     }
 
