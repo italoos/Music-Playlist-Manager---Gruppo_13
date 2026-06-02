@@ -2,7 +2,7 @@ package com.musicmanager.model;
 
 import java.util.Set;
 
-public class Track {
+public class Track {/* */
 
     @SuppressWarnings("unused")
     private int id;
@@ -33,74 +33,68 @@ public class Track {
     }
 
     public int getId() {
-        // TODO getId
-        return 0;
+        return id;
     }
 
     public String getTitle() {
-        // TODO getTitle
-        return null;
+        return title;
     }
 
     public String getAuthor() {
-        // TODO getAuthor
-        return null;
+        return author;
     }
 
     public int getLength() {
-        // TODO getLength
-        return 0;
+        return length;
     }
 
     public String getGenre() {
-        // TODO getGenre
-        return null;
+        return genre;
     }
 
     public int getYear() {
-        // TODO getYear
-        return 0;
+        return year;
     }
 
     public int getPlayCount() {
-        // TODO getPlayCount
-        return 0;
+        return playCount;
     }
 
     public void setId(int id) {
-        // TODO setId
+        this.id = id;
     }
 
     public void setTitle(String title) {
-        // TODO setTitle
+        this.title = title;
     }
 
     public void setAuthor(String author) {
-        // TODO setAuthor
+        this.author = author;
     }
 
     public void setLength(int length) {
-        // TODO setLength
+        this.length = length;
     }
 
     public void setGenre(String genre) {
-        // TODO setGenre
+        this.genre = genre;
     }
 
     public void setYear(int year) {
-        // TODO setYear
+        this.year = year;
     }
 
     public void incrementPlayCount() {
-        // TODO incrementPlayCount
+        playCount++;
     }
 
     public void addTag(Tag tag) {
-        // TODO addTag
+        if (tags != null) {
+            tags.add(tag);
+        }
     }
 
     public Set<Tag> getTags() {
-        // TODO getTags
-        return null;
+        return tags;
     }
 }

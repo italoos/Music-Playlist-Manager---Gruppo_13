@@ -1,5 +1,8 @@
 package com.musicmanager.controller;
 
+import java.io.File;
+import java.io.IOException;
+
 import com.musicmanager.model.Track;
 import com.musicmanager.repository.TrackRepository;
 import com.musicmanager.repository.TrackRepositoryImpl;
@@ -13,6 +16,29 @@ public class MainController {
     private final TrackRepository trackRepository = new TrackRepositoryImpl();
 
     private final ObservableList<Track> tracks = FXCollections.observableArrayList();
+
+
+    /** Gestisce la modifica di un brano musicale. */
+
+    public void handleCreateTrack(File file) {
+
+    try {
+
+        TrackFileParser parser = new TrackFileParser();
+
+        Track track = parser.parse(file);
+
+        trackRepository.save(track);
+
+    } catch (IOException e) {
+
+        e.printStackTrace();
+
+        // TO DO: mostrare messaggio di errore nella GUI
+    }
+
+    
+}
 
     /** Gestisce la modifica di un brano musicale. */
 
