@@ -11,13 +11,16 @@ import com.musicmanager.repository.TrackRepositoryImpl;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.stage.FileChooser;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
+import javafx.stage.Stage;
 
 public class MainController { 
 
@@ -29,6 +32,9 @@ public class MainController {
 
     @FXML
     private ListView<Track> tracksListView;
+
+    @FXML
+    private Button addTrackButton;
 
     @FXML
     private MediaPlayerUI mediaPlayerUI;
@@ -46,7 +52,7 @@ public class MainController {
         mediaPlayerUI.setController(this);
         playbackEngine.registerObserver(mediaPlayerUI);
         playbackEngine.notifyObservers();
-        /*Track track = new Track(0, "Short", "Antonio", 10, "Metal", 2010, 0, null);
+        /*Track track = new Track(0, "Short", "Antonio", 10, "Metal", 2010);
         trackRepository.save(track);
         tracks.add(track);*/
         loadTracksFromDatabase();
@@ -92,8 +98,27 @@ public class MainController {
         System.out.println("[MAIN CONTROLLER] INFO: Tracks loaded from database (" + tracks.size() + ").");
     }
 
+    /**
+     * Apre un FileChooser per selezionare un file di traccia e crea una nuova traccia.
+     */
+    @FXML
+    public void handleAddTrackButtonClick() {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Seleziona un file di traccia");
+        fileChooser.getExtensionFilters().add(
+            new FileChooser.ExtensionFilter("File di testo", "*.txt")
+        );
 
-    /** Gestisce la modifica di un brano musicale. */
+        Stage stage = (Stage) addTrackButton.getScene().getWindow();
+        File selectedFile = fileChooser.showOpenDialog(stage);
+
+        if (selectedFile != null) {
+            handleCreateTrack(selectedFile);
+        }
+    }
+
+
+    /** Gestisce la creazione di un nuovo brano musicale a partire da un file. */
 
     public void handleCreateTrack(File file) {
 
@@ -103,18 +128,55 @@ public class MainController {
 
         Track track = parser.parse(file);
 
+        if (isDuplicateTrack(track)) {
+            showDuplicateTrackAlert(track);
+            return;
+        }
+
         trackRepository.save(track);
         tracks.add(track);
 
-    } catch (IOException e) {
+    } catch (Exception e) {
 
         e.printStackTrace();
 
-        // TO DO: mostrare messaggio di errore nella GUI
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Errore");
+        alert.setHeaderText("File non valido");
+        alert.setContentText("Il file selezionato non è valido o non può essere letto. Assicurati che il file abbia il formato corretto.");
+        alert.showAndWait();
     }
 
     
 }
+
+    private boolean isDuplicateTrack(Track newTrack) {
+        return tracks.stream().anyMatch(existingTrack -> hasSameFields(existingTrack, newTrack));
+    }
+
+    private boolean hasSameFields(Track firstTrack, Track secondTrack) {
+        return sameText(firstTrack.getTitle(), secondTrack.getTitle())
+                && sameText(firstTrack.getAuthor(), secondTrack.getAuthor())
+                && firstTrack.getLength() == secondTrack.getLength()
+                && sameText(firstTrack.getGenre(), secondTrack.getGenre())
+                && firstTrack.getYear() == secondTrack.getYear();
+    }
+
+    private boolean sameText(String firstText, String secondText) {
+        if (firstText == null || secondText == null) {
+            return firstText == secondText;
+        }
+
+        return firstText.trim().equalsIgnoreCase(secondText.trim());
+    }
+
+    private void showDuplicateTrackAlert(Track track) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Traccia duplicata");
+        alert.setHeaderText("Traccia gia presente");
+        alert.setContentText("La traccia \"" + track.getTitle() + "\" ha gli stessi campi di una traccia gia presente nella lista.");
+        alert.showAndWait();
+    }
 
     /** Gestisce la modifica di un brano musicale. */
 
