@@ -31,10 +31,19 @@ import javafx.stage.Stage;
 public class MainController { 
 
     private final CommandManager commandManager = new CommandManager();
-    private final TrackRepository trackRepository = new TrackRepositoryImpl();
-    private final PlaybackEngine playbackEngine = PlaybackEngine.getInstance();
+    private final TrackRepository trackRepository;
+    private final PlaybackEngine playbackEngine;
 
     private final ObservableList<Track> tracks = FXCollections.observableArrayList();
+
+    public MainController() {
+        this(new TrackRepositoryImpl(), PlaybackEngine.getInstance());
+    }
+
+    MainController(TrackRepository trackRepository, PlaybackEngine playbackEngine) {
+        this.trackRepository = trackRepository;
+        this.playbackEngine = playbackEngine;
+    }
 
     @FXML
     private ListView<Track> tracksListView;
