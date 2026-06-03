@@ -3,7 +3,7 @@ package com.musicmanager.model;
 import java.util.HashSet;
 import java.util.Set;
 
-public class Track {
+public class Track {/* */
 
     @SuppressWarnings("unused")
     private int id;
