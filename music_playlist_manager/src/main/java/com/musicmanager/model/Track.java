@@ -1,5 +1,6 @@
 package com.musicmanager.model;
 
+import java.util.HashSet;
 import java.util.Set;
 
 public class Track {/* */
@@ -29,7 +30,7 @@ public class Track {/* */
         this.genre = genre;
         this.year = year;
         this.playCount = playCount;
-        this.tags = tags;
+        this.tags = tags == null ? new HashSet<>() : new HashSet<>(tags);
     }
 
     public int getId() {
@@ -89,12 +90,12 @@ public class Track {/* */
     }
 
     public void addTag(Tag tag) {
-        if (tags != null) {
+        if (tag != null) {
             tags.add(tag);
         }
     }
 
     public Set<Tag> getTags() {
-        return tags;
+        return new HashSet<>(tags);
     }
 }

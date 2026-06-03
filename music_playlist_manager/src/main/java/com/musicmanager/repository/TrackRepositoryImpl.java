@@ -2,6 +2,9 @@ package com.musicmanager.repository;
 
 import com.musicmanager.database.DatabaseManager;
 import com.musicmanager.model.Track;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -13,6 +16,43 @@ import java.sql.Statement;
  */
 
 public class TrackRepositoryImpl implements TrackRepository {
+
+    /**
+     * Recupera tutti i brani musicali presenti nella tabella "Tracks".
+     */
+
+    @Override
+    public List<Track> findAll() {
+
+        String sql = "SELECT id, title, author, length, genre, \"year\" FROM Tracks ORDER BY id;";
+        List<Track> tracks = new ArrayList<>();
+
+        try {
+            Connection conn = DatabaseManager.getInstance().getConnection();
+            try (PreparedStatement pstmt = conn.prepareStatement(sql);
+                    ResultSet rs = pstmt.executeQuery()) {
+
+                while (rs.next()) {
+                    tracks.add(new Track(
+                            rs.getInt("id"),
+                            rs.getString("title"),
+                            rs.getString("author"),
+                            rs.getInt("length"),
+                            rs.getString("genre"),
+                            rs.getInt("year"),
+                            0,
+                            Collections.emptySet()));
+                }
+
+                System.out.println("[H2 DATABASE] INFO: Tracks loaded successfully (" + tracks.size() + ").");
+            }
+        } catch (SQLException e) {
+            System.err.println("[H2 DATABASE] ERROR: Tracks loading failed: " + e.getMessage());
+        }
+
+        return tracks;
+
+    }
 
     /**
      * Inserisce un brano musicale nella tabella "Tracks".

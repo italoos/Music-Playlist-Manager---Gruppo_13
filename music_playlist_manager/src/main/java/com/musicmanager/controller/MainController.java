@@ -6,9 +6,17 @@ import java.io.IOException;
 import com.musicmanager.model.Track;
 import com.musicmanager.repository.TrackRepository;
 import com.musicmanager.repository.TrackRepositoryImpl;
+import java.io.IOException;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.ListView;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.Region;
 
 public class MainController {
 
@@ -138,6 +146,18 @@ public class MainController {
     */
 
     public void handlePlay() {
+        playTrack(tracksListView.getSelectionModel().getSelectedItem());
+    }
+
+    private void playTrack(Track track) {
+
+        if (track == null) {
+            System.out.println("[MAIN CONTROLLER] WARNING: No track selected for playback.");
+            return;
+        }
+
+        tracksListView.getSelectionModel().select(track);
+        System.out.println("[MAIN CONTROLLER] INFO: Play requested for track: " + track.getTitle() + ".");
 
         // TO DO:
         // Avviare la riproduzione della traccia corrente
