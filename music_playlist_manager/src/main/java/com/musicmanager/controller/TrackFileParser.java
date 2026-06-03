@@ -66,9 +66,7 @@ public class TrackFileParser {
                 author,
                 length,
                 genre,
-                year,
-                0,        // playCount iniziale
-                new HashSet<>()     // nessun tag iniziale
+                year
          );
 
     }

@@ -3,10 +3,11 @@ package com.musicmanager.controller;
 import java.io.File;
 import java.io.IOException;
 
+import com.musicmanager.MediaPlayerUI;
+import com.musicmanager.PlaybackEngine;
 import com.musicmanager.model.Track;
 import com.musicmanager.repository.TrackRepository;
 import com.musicmanager.repository.TrackRepositoryImpl;
-import java.io.IOException;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -18,17 +19,19 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 
-public class MainController {
-
-    
+public class MainController { 
 
     private final CommandManager commandManager = new CommandManager();
     private final TrackRepository trackRepository = new TrackRepositoryImpl();
+    private final PlaybackEngine playbackEngine = PlaybackEngine.getInstance();
 
     private final ObservableList<Track> tracks = FXCollections.observableArrayList();
 
     @FXML
     private ListView<Track> tracksListView;
+
+    @FXML
+    private MediaPlayerUI mediaPlayerUI;
 
     @FXML
     private void loadPrimaryStage() throws IOException {
@@ -40,6 +43,12 @@ public class MainController {
         tracksListView.setPlaceholder(new Label("I tuoi brani musicali saranno visualizzati qui"));
         tracksListView.setItems(tracks);
         tracksListView.setCellFactory(listView -> new TrackListCell());
+        mediaPlayerUI.setController(this);
+        playbackEngine.registerObserver(mediaPlayerUI);
+        playbackEngine.notifyObservers();
+        /*Track track = new Track(0, "Short", "Antonio", 10, "Metal", 2010, 0, null);
+        trackRepository.save(track);
+        tracks.add(track);*/
         loadTracksFromDatabase();
     }
 
@@ -68,7 +77,7 @@ public class MainController {
                 return;
             }
 
-            trackLabel.setText(track.getTitle() + " - " + track.getAuthor() + " (" + track.getGenre() + ", " + track.getYear() + ")");
+            trackLabel.setText(track.getTitle() + " - " + track.getAuthor() + "  (" + track.getGenre() + ", " + track.getYear() + ")");
             setText(null);
             setGraphic(content);
         }
@@ -95,6 +104,7 @@ public class MainController {
         Track track = parser.parse(file);
 
         trackRepository.save(track);
+        tracks.add(track);
 
     } catch (IOException e) {
 
@@ -160,68 +170,10 @@ public class MainController {
         return tracks;
     }
 
-    /*
-    // TO DO:
-    // Verificare se PlaybackEngine deve essere gestito come Singleton
-    // oppure passato tramite dependency injection nel costruttore
-    private PlaybackEngine playbackEngine;
-
-    // TO DO:
-    // Collegare la GUI principale al controller
-    // e registrare eventuali listener/event handler
-    private MediaPlayerUI view;
-
-    /*
-    // TO DO:
-    // Gestire storico dei comandi per supportare Undo
-    private CommandManager commandManager;
-
-    // TO DO:
-    // Implementare persistenza delle tracce nel database locale
-    private TrackRepository trackRepository;
-
-    // TO DO:
-    // Implementare persistenza delle playlist nel database locale
-    private PlaylistRepository playlistRepository;
-    */
-
-   
-    public MainController(
-            PlaybackEngine playbackEngine,
-            MediaPlayerUI view
-            /*
-            ,
-            CommandManager commandManager,
-            TrackRepository trackRepo,
-            PlaylistRepository playlistRepo
-            */
-    ) {
-
-        // TO DO:
-        // Validare eventuali dipendenze null
-        // e inizializzare il controller
-
-        this.playbackEngine = playbackEngine;
-        this.view = view;
-
-        /*
-        this.commandManager = commandManager;
-        this.trackRepository = trackRepo;
-        this.playlistRepository = playlistRepo;
-        */
-    }
-
+    @FXML
     public void handlePlay() {
-        playTrack(tracksListView.getSelectionModel().getSelectedItem());
-        
-        Track currentTrack = playbackEngine.getCurrentTrack();
-
-        if (currentTrack == null) {
-            view.showMessage("Nessuna traccia selezionata");
-            return;
-        }
-
-        playbackEngine.play();
+        Track selectedTrack = tracksListView == null ? null : tracksListView.getSelectionModel().getSelectedItem();
+        playTrack(selectedTrack);
     }
 
     private void playTrack(Track track) {
@@ -232,18 +184,12 @@ public class MainController {
         }
 
         tracksListView.getSelectionModel().select(track);
+        playbackEngine.setCurrentTrack(track);
+        playbackEngine.play();
         System.out.println("[MAIN CONTROLLER] INFO: Play requested for track: " + track.getTitle() + ".");
     }
 
     public void handlePause() {
-
-        Track currentTrack = playbackEngine.getCurrentTrack();
-
-        if (currentTrack == null) {
-            view.showMessage("Nessuna traccia in riproduzione");
-            return;
-        }
-
         playbackEngine.pause();
     }
 
@@ -258,17 +204,19 @@ public class MainController {
     }
 
     public void handleTogglePlayback() {
-
-        if (playbackEngine.getCurrentTrack() == null) {
-            view.showMessage("Nessuna traccia selezionata");
+        if (playbackEngine.isPlaying()) {
+            handlePause();
             return;
         }
 
-        if (playbackEngine.isPlaying()) {
-            playbackEngine.pause();
-        } else {
+        Track currentTrack = playbackEngine.getCurrentTrack();
+
+        if (currentTrack != null) {
             playbackEngine.play();
+            return;
         }
+
+        handlePlay();
     }
 
     /*

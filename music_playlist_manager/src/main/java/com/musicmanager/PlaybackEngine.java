@@ -2,6 +2,8 @@ package com.musicmanager;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.musicmanager.model.Playlist;
+import com.musicmanager.model.Track;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.util.Duration;
@@ -18,36 +20,45 @@ public class PlaybackEngine {
     private Timeline timeline;
     private PlayerState currentState;
 
-private PlaybackEngine() {
+    private PlaybackEngine() {
+        this(true);
+    }
 
-    currentState = new PausedState();
+    private PlaybackEngine(boolean initializeTimeline) {
+        currentState = new PausedState();
+        currentTime = 0;
 
-    timeline = new Timeline(
-        new KeyFrame(Duration.seconds(1), e -> {
+        if (initializeTimeline) {
+            initTimeline();
+        }
+    }
 
-            if (!(currentState instanceof PlayingState)) {
-                return;
-            }
+    private void initTimeline() {
+        timeline = new Timeline(
+            new KeyFrame(Duration.seconds(1), e -> {
 
-            if (currentTrack == null) {
-                return;
-            }
+                if (!(currentState instanceof PlayingState)) {
+                    return;
+                }
 
-            currentTime++;
+                if (currentTrack == null) {
+                    return;
+                }
 
-            if (currentTime >= currentTrack.getLength()) {
-                currentTime = currentTrack.getLength();
+                currentTime++;
 
-                currentState = new PausedState();
-            }
+                if (currentTime >= currentTrack.getLength()) {
+                    currentTime = currentTrack.getLength();
+                    currentState = new PausedState();
+                }
 
-            notifyObservers();
-        })
-    );
+                notifyObservers();
+            })
+        );
 
-    timeline.setCycleCount(Timeline.INDEFINITE);
-    timeline.play();
-}
+        timeline.setCycleCount(Timeline.INDEFINITE);
+        timeline.play();
+    }
 
     public static PlaybackEngine getInstance() {
         if (instance == null) {
@@ -56,7 +67,16 @@ private PlaybackEngine() {
         return instance;
     }
 
+    static PlaybackEngine getTestInstance() {
+        instance = new PlaybackEngine(false);
+        return instance;
+    }
+
     public void registerObserver(PlaybackObserver o) {
+        if (observers.contains(o)) {
+            return;
+        }
+
         observers.add(o);
     }
 

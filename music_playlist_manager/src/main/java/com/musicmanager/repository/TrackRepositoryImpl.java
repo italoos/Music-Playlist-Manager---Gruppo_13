@@ -39,9 +39,8 @@ public class TrackRepositoryImpl implements TrackRepository {
                             rs.getString("author"),
                             rs.getInt("length"),
                             rs.getString("genre"),
-                            rs.getInt("year"),
-                            0,
-                            Collections.emptySet()));
+                            rs.getInt("year")
+                    ));
                 }
 
                 System.out.println("[H2 DATABASE] INFO: Tracks loaded successfully (" + tracks.size() + ").");

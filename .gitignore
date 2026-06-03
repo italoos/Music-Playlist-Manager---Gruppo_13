@@ -12,14 +12,18 @@ build/
 .gradle/
 out/
 
-# --- Configurazioni degli IDE (IntelliJ IDEA, VS Code, Eclipse) ---
-.idea/
-.vscode/
+# --- IDE e editor ---
 *.iml
+.idea/
+*.ipr
 *.iws
-.classpath
-.project
-.settings/
+*.class
+
+# --- Maven wrapper ---
+.mvn/
+
+# --- Configurazioni di VS Code ---
+.vscode/
 
 # --- File temporanei del Sistema Operativo ---
 .DS_Store

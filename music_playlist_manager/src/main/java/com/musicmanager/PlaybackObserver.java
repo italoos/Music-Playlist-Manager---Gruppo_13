@@ -1,5 +1,8 @@
 package com.musicmanager;
 
+import com.musicmanager.model.Playlist;
+import com.musicmanager.model.Track;
+
 public interface PlaybackObserver{
 
 
