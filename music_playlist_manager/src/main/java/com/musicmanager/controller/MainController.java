@@ -63,8 +63,8 @@ public class MainController {
 
         private final Label trackLabel = new Label();
         private final Region spacer = new Region();
-        private final Button playButton = new Button("Play");
-        private final Button deleteButton = new Button("Delete");
+        private final Button playButton = new Button("▶"); // Unicode per simbolo play
+        private final Button deleteButton = new Button("🗑"); // Unicode per simbolo cestino 
         private final HBox content = new HBox(16, trackLabel, spacer, playButton, deleteButton);
 
         private TrackListCell() {
