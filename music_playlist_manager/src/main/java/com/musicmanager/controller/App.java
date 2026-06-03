@@ -1,8 +1,13 @@
-package com.musicmanager;
+package com.musicmanager.controller;
 
 import javafx.application.Application;
 import javafx.stage.Stage;
+import com.musicmanager.model;
 
+
+/**
+ * JavaFX App
+ */
 public class App extends Application {
 
     @Override
@@ -32,5 +37,12 @@ public class App extends Application {
 
     public static void main(String[] args) {
         launch(args);
+    private static Parent loadFXML(String fxml) throws IOException {
+        FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource("/com/musicmanager/" + fxml + ".fxml"));
+        return fxmlLoader.load();
+    }
+
+    public static void main(String[] args) {
+        launch();
     }
 }
