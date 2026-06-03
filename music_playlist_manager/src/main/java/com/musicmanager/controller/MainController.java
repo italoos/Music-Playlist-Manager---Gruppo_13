@@ -2,6 +2,7 @@ package com.musicmanager.controller;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Optional;
 
 import com.musicmanager.MediaPlayerUI;
 import com.musicmanager.PlaybackEngine;
@@ -13,11 +14,15 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.Dialog;
 import javafx.stage.FileChooser;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
@@ -26,10 +31,19 @@ import javafx.stage.Stage;
 public class MainController { 
 
     private final CommandManager commandManager = new CommandManager();
-    private final TrackRepository trackRepository = new TrackRepositoryImpl();
-    private final PlaybackEngine playbackEngine = PlaybackEngine.getInstance();
+    private final TrackRepository trackRepository;
+    private final PlaybackEngine playbackEngine;
 
     private final ObservableList<Track> tracks = FXCollections.observableArrayList();
+
+    public MainController() {
+        this(new TrackRepositoryImpl(), PlaybackEngine.getInstance());
+    }
+
+    MainController(TrackRepository trackRepository, PlaybackEngine playbackEngine) {
+        this.trackRepository = trackRepository;
+        this.playbackEngine = playbackEngine;
+    }
 
     @FXML
     private ListView<Track> tracksListView;
@@ -65,16 +79,20 @@ public class MainController {
         private final Region spacer = new Region();
         private final Button playButton = new Button("▶"); // Unicode per simbolo play
         private final Button deleteButton = new Button("🗑"); // Unicode per simbolo cestino 
-        private final HBox content = new HBox(16, trackLabel, spacer, playButton, deleteButton);
+        private final Button editButton = new Button("\u270E"); // Unicode per simbolo edit
+        private final HBox content = new HBox(16, trackLabel, spacer, playButton, editButton, deleteButton);
 
         private TrackListCell() {
             HBox.setHgrow(spacer, Priority.ALWAYS);
             trackLabel.setMaxWidth(Double.MAX_VALUE);
             playButton.visibleProperty().bind(hoverProperty());
             playButton.managedProperty().bind(playButton.visibleProperty());
+            editButton.visibleProperty().bind(hoverProperty());
+            editButton.managedProperty().bind(editButton.visibleProperty());
             deleteButton.visibleProperty().bind(hoverProperty());
             deleteButton.managedProperty().bind(deleteButton.visibleProperty());
             playButton.setOnAction(event -> playTrack(getItem()));
+            editButton.setOnAction(event -> showEditTrackDialog(getItem()));
             deleteButton.setOnAction(event -> confirmAndDeleteTrack(getItem()));
         }
 
@@ -107,6 +125,66 @@ public class MainController {
             if (result.isPresent() && result.get() == ButtonType.OK) {
                 handleDeleteTrack(track);
             }
+        }
+
+        private void showEditTrackDialog(Track track) {
+            if (track == null) {
+                return;
+            }
+
+            Dialog<Track> dialog = new Dialog<>();
+            dialog.setTitle("Modifica traccia");
+            dialog.setHeaderText("Modifica i dati della traccia");
+
+            ButtonType saveButtonType = new ButtonType("Salva", ButtonBar.ButtonData.OK_DONE);
+            dialog.getDialogPane().getButtonTypes().addAll(saveButtonType, ButtonType.CANCEL);
+
+            TextField titleField = new TextField(track.getTitle());
+            TextField authorField = new TextField(track.getAuthor());
+            TextField lengthField = new TextField(String.valueOf(track.getLength()));
+            TextField genreField = new TextField(track.getGenre());
+            TextField yearField = new TextField(String.valueOf(track.getYear()));
+
+            GridPane form = new GridPane();
+            form.setHgap(10);
+            form.setVgap(10);
+            form.addRow(0, new Label("Titolo"), titleField);
+            form.addRow(1, new Label("Autore"), authorField);
+            form.addRow(2, new Label("Durata"), lengthField);
+            form.addRow(3, new Label("Genere"), genreField);
+            form.addRow(4, new Label("Anno"), yearField);
+
+            dialog.getDialogPane().setContent(form);
+            dialog.setResultConverter(button -> {
+                if (button != saveButtonType) {
+                    return null;
+                }
+
+                try {
+                    return new Track(
+                            track.getId(),
+                            titleField.getText(),
+                            authorField.getText(),
+                            Integer.parseInt(lengthField.getText().trim()),
+                            genreField.getText(),
+                            Integer.parseInt(yearField.getText().trim())
+                    );
+                } catch (NumberFormatException e) {
+                    showInvalidTrackEditAlert();
+                    return null;
+                }
+            });
+
+            Optional<Track> updatedTrack = dialog.showAndWait();
+            updatedTrack.ifPresent(value -> handleUpdateTrack(track, value));
+        }
+
+        private void showInvalidTrackEditAlert() {
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Errore");
+            alert.setHeaderText("Dati non validi");
+            alert.setContentText("Durata e anno devono essere numeri interi.");
+            alert.showAndWait();
         }
     }
 
