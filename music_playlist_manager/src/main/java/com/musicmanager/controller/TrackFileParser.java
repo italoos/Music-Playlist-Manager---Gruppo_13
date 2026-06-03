@@ -55,7 +55,7 @@ public class TrackFileParser {
 
 
          // verifica per evitare di creare tracce con dati incompleti
-         if(title.isBlank() || author.isBlank() || genre.isBlank()) {
+         if(title.isBlank() || author.isBlank() || genre.isBlank() || length <= 0 || year <= 0) {
 
             throw new IllegalArgumentException("File traccia non valido");
 }

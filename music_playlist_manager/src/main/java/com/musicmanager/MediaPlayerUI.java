@@ -40,7 +40,7 @@ public class MediaPlayerUI extends HBox implements PlaybackObserver {
     private void initComponents() {
         trackLabel = new Label("Nessuna traccia selezionata");
         timeLabel = new Label("00:00 / 00:00");
-        playButton = new Button("Play");
+        playButton = new Button("▶"); // Unicode per simbolo play
         progressBar = new ProgressBar(0);
 
         trackLabel.setMaxWidth(Double.MAX_VALUE);
@@ -80,7 +80,7 @@ public class MediaPlayerUI extends HBox implements PlaybackObserver {
 
     @Override
     public void update(Track currentTrack, Playlist currentPlaylist, int currentTime, boolean isPlaying) {
-        playButton.setText(isPlaying ? "Pause" : "Play");
+        playButton.setText(isPlaying ? "⏸" : "▶"); // Unicode per simbolo pause e play
 
         if (currentTrack != null) {
             trackLabel.setText(currentTrack.getTitle() + " - " + currentTrack.getAuthor() + "  (" + currentTrack.getGenre() + ", " + currentTrack.getYear() + ")");
