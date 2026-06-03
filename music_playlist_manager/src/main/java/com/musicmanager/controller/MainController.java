@@ -13,6 +13,7 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ButtonType;
 import javafx.stage.FileChooser;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
@@ -63,14 +64,18 @@ public class MainController {
         private final Label trackLabel = new Label();
         private final Region spacer = new Region();
         private final Button playButton = new Button("Play");
-        private final HBox content = new HBox(16, trackLabel, spacer, playButton);
+        private final Button deleteButton = new Button("Delete");
+        private final HBox content = new HBox(16, trackLabel, spacer, playButton, deleteButton);
 
         private TrackListCell() {
             HBox.setHgrow(spacer, Priority.ALWAYS);
             trackLabel.setMaxWidth(Double.MAX_VALUE);
             playButton.visibleProperty().bind(hoverProperty());
             playButton.managedProperty().bind(playButton.visibleProperty());
+            deleteButton.visibleProperty().bind(hoverProperty());
+            deleteButton.managedProperty().bind(deleteButton.visibleProperty());
             playButton.setOnAction(event -> playTrack(getItem()));
+            deleteButton.setOnAction(event -> confirmAndDeleteTrack(getItem()));
         }
 
         @Override
@@ -86,6 +91,22 @@ public class MainController {
             trackLabel.setText(track.getTitle() + " - " + track.getAuthor() + "  (" + track.getGenre() + ", " + track.getYear() + ")");
             setText(null);
             setGraphic(content);
+        }
+
+        private void confirmAndDeleteTrack(Track track) {
+            if (track == null) {
+                return;
+            }
+
+            Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+            confirmAlert.setTitle("Conferma eliminazione");
+            confirmAlert.setHeaderText("Eliminare la traccia?");
+            confirmAlert.setContentText("Sei sicuro di voler eliminare \"" + track.getTitle() + "\"?\nQuesta azione rimuoverà la traccia dal sistema.");
+
+            java.util.Optional<ButtonType> result = confirmAlert.showAndWait();
+            if (result.isPresent() && result.get() == ButtonType.OK) {
+                handleDeleteTrack(track);
+            }
         }
     }
 
