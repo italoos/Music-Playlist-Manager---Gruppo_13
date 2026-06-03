@@ -15,7 +15,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 
-public class MainController {
+public class MainController { 
 
     private final CommandManager commandManager = new CommandManager();
     private final TrackRepository trackRepository = new TrackRepositoryImpl();
@@ -63,7 +63,7 @@ public class MainController {
                 return;
             }
 
-            trackLabel.setText(track.getTitle() + " - " + track.getAuthor() + " (" + track.getGenre() + ", " + track.getYear() + ")");
+            trackLabel.setText(track.getTitle() + " - " + track.getAuthor() + "  (" + track.getGenre() + ", " + track.getYear() + ")");
             setText(null);
             setGraphic(content);
         }
