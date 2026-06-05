@@ -8,11 +8,27 @@ public class Playlist {
     private String name;
     private int playCount;
     private List<Track> tracks;
+    private int id;
 
     public Playlist(String name) {
         this.name = name;
         this.playCount = 0;
         this.tracks = new ArrayList<>();
+    }
+
+    public Playlist(int id, String name) {
+        this.id = id;
+        this.name = name;
+        this.playCount = 0;
+        this.tracks = new ArrayList<>();
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getName() {

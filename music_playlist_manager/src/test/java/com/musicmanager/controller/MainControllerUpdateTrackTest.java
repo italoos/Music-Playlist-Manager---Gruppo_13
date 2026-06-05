@@ -52,7 +52,7 @@ class MainControllerUpdateTrackTest {
     @BeforeEach
     void setUp() {
         repository = new InMemoryTrackRepository();
-        controller = new MainController(repository, null);
+        controller = new MainController(repository, null, null);
 
         originalTrack = new Track(1, "Bad Guy", "Billie Eilish", 194, "Pop", 2019);
         repository.save(originalTrack);
