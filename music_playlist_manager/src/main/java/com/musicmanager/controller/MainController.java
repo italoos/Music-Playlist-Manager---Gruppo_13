@@ -157,6 +157,26 @@ public class MainController {
         }
 
         /**
+         * Mostra un dialog di conferma prima di eliminare una playlist. Se l'utente conferma, chiama il metodo handleRemovePlaylist per eseguire l'eliminazione.
+         * @param playlist La playlist da eliminare. Deve essere una playlist già presente nella lista e nel repository. Se è null, non viene eseguita alcuna operazione e viene mostrato un messaggio di avviso.
+         */
+        private void confirmAndDeletePlaylist(Playlist playlist) {
+            if (playlist == null) {
+                return;
+            }
+
+            Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+            confirmAlert.setTitle("Conferma eliminazione");
+            confirmAlert.setHeaderText("Eliminare la playlist?");
+            confirmAlert.setContentText("Sei sicuro di voler eliminare la playlist \"" + playlist.getName() + "\"?\nQuesta azione rimuoverà la playlist dal sistema.");
+
+            java.util.Optional<ButtonType> result = confirmAlert.showAndWait();
+            if (result.isPresent() && result.get() == ButtonType.OK) {
+                handleRemovePlaylist();
+            }
+        }
+
+        /**
          * Mostra un dialog per l'editing di una traccia.
          * @param track La traccia da modificare.
          */
