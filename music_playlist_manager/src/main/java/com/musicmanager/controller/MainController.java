@@ -364,7 +364,6 @@ public class MainController {
      * @param track La traccia da aggiornare. Deve essere una traccia già presente nella lista e nel repository.
      * @param updatedTrack La traccia con i nuovi dati. I campi di questa traccia verranno copiati nella traccia originale. Non deve essere presente nella lista o nel repository, altrimenti si rischia di creare una traccia duplicata.
      */
-
     @FXML
     public void handleUpdateTrack(Track track, Track updatedTrack) {
 
@@ -395,7 +394,6 @@ public class MainController {
      * Gestisce la rimozione di una traccia musicale. Riceve la traccia da rimuovere, elimina la traccia dal repository e dalla lista dei brani per riflettere le modifiche nella GUI. Prima di eseguire l'eliminazione, mostra un dialog di conferma per evitare eliminazioni accidentali.
      * @param track La traccia da rimuovere. Deve essere una traccia già presente nella lista e nel repository.
      */
-
     @FXML
     public void handleDeleteTrack(Track track) {
 
@@ -410,7 +408,6 @@ public class MainController {
     }
 
     /** Ripristina lo stato precedente annullando l'ultima operazione. */
-
     @FXML
     public void handleUndo() {
         commandManager.undoLastCommand();
@@ -657,6 +654,10 @@ public class MainController {
 
     }
 
+    /**
+     * Mostra un dialog per modificare il nome di una playlist. Riceve la playlist da modificare, mostra un dialog con un campo di testo precompilato con il nome attuale della playlist e consente all'utente di inserire un nuovo nome. Se l'utente conferma, valida il nuovo nome (non vuoto, non duplicato) e aggiorna la playlist con il nuovo nome, salvando le modifiche nel repository e aggiornando la GUI. Se il nuovo nome non è valido, mostra un alert di errore.
+     * @param playlist La playlist da modificare. Deve essere una playlist già presente nella lista e nel repository. Viene utilizzata per precompilare il campo di testo del dialog con il nome attuale della playlist e per aggiornare il nome della playlist se l'utente conferma la modifica.
+     */
     private void showEditPlaylistDialog(Playlist playlist) {
 
         TextInputDialog dialog = new TextInputDialog(playlist.getName());
@@ -696,6 +697,10 @@ public class MainController {
         });
     }
 
+    /**
+     * Mostra un alert di errore quando si tenta di modificare il nome di una playlist con un nome non valido (vuoto o duplicato). Informa l'utente che il nome inserito non è valido e deve essere modificato.
+     * @param message Il messaggio da visualizzare nell'alert. Deve essere una stringa che spiega il motivo per cui il nome della playlist non è valido (ad esempio, "Il nome non può essere vuoto" o "Esiste già una playlist con questo nome"). Viene mostrato nel contenuto dell'alert per informare l'utente del problema specifico con il nome inserito.
+     */
     private void showInvalidPlaylistNameAlert(String message) {
 
         Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -705,6 +710,9 @@ public class MainController {
         alert.showAndWait();
     }
 
+    /**
+     * Mostra la vista delle playlist.
+     */
     private void showPlaylistsView() {
 
         selectedPlaylist = null;
