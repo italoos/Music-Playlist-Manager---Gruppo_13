@@ -19,6 +19,8 @@ public class PlaybackEngine {
     private int currentTime;
     private Timeline timeline;
     private PlayerState currentState;
+    private PlaybackStrategy strategy;
+    
 
     private PlaybackEngine() {
         this(true);
@@ -27,6 +29,9 @@ public class PlaybackEngine {
     private PlaybackEngine(boolean initializeTimeline) {
         currentState = new PausedState();
         currentTime = 0;
+
+        // Modalità di riproduzione di default
+        strategy = new SequentialStrategy();
 
         if (initializeTimeline) {
             initTimeline();
@@ -48,8 +53,8 @@ public class PlaybackEngine {
                 currentTime++;
 
                 if (currentTime >= currentTrack.getLength()) {
-                    currentTime = currentTrack.getLength();
-                    currentState = new PausedState();
+                    nextTrack();
+                    return;
                 }
 
                 notifyObservers();
@@ -121,8 +126,50 @@ public class PlaybackEngine {
         this.currentState = state;
     }
 
+    public void setStrategy(PlaybackStrategy strategy) {
+        this.strategy = strategy;
+    }
+
     //Controlla se il MediaPlayer è attualmente in riproduzione
     public boolean isPlaying() {
         return currentState instanceof PlayingState;
+    }
+
+    /**
+     * Determina e avvia la prossima traccia della playlist
+     * utilizzando la PlaybackStrategy attualmente selezionata.
+     *
+     * Se non esiste una traccia successiva, la riproduzione
+     * viene interrotta e il player passa allo stato Paused.
+     */
+    public void nextTrack() {
+
+        if(currentPlaylist == null || currentTrack == null) {
+            return;
+        }
+    
+        int currentIndex =
+                currentPlaylist.indexOf(currentTrack);
+    
+        Track nextTrack =
+                strategy.getNext(
+                    currentPlaylist.getTracks(),
+                    currentIndex
+                );
+    
+        if(nextTrack == null) {
+    
+            currentTime = 0;
+    
+            setState(new PausedState());
+    
+            notifyObservers();
+    
+            return;
+        }
+    
+        setCurrentTrack(nextTrack);
+    
+        play();
     }
 }

@@ -394,6 +394,10 @@ public class MainController {
         handlePlay();
     }
 
+    public void handleSetStrategy() {
+        // TO DO: Implementare strategia di riproduzione
+        // playbackEngine.setStrategy(<nuova strategia>);
+        }
     public ObservableList<Playlist> getPlaylists() {
         return playlists;
     }
@@ -558,28 +562,6 @@ public class MainController {
 
         // TO DO:
         // Aggiornare persistenza e GUI
-    }
-
-    public void handleUpdateTrack(
-            Track t,
-            String title,
-            String author,
-            int length,
-            String genre,
-            int year
-    ) {
-
-        // TO DO:
-        // Validare input utente
-
-        // TO DO:
-        // Aggiornare dati della traccia
-
-        // TO DO:
-        // Salvare modifiche nel database
-
-        // TO DO:
-        // Aggiornare la visualizzazione
     }
 
     public void handleUpdatePlaylistName(Playlist p, String newName) {
