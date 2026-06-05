@@ -14,6 +14,8 @@
 /Users/antoniobellofatto/Documents/Software Architecture/Music-Playlist-Manager---Gruppo_13/music_playlist_manager/src/main/java/com/musicmanager/model/Playlist.java
 /Users/antoniobellofatto/Documents/Software Architecture/Music-Playlist-Manager---Gruppo_13/music_playlist_manager/src/main/java/com/musicmanager/repository/TrackRepository.java
 /Users/antoniobellofatto/Documents/Software Architecture/Music-Playlist-Manager---Gruppo_13/music_playlist_manager/src/main/java/com/musicmanager/database/DatabaseManager.java
+/Users/antoniobellofatto/Documents/Software Architecture/Music-Playlist-Manager---Gruppo_13/music_playlist_manager/src/main/java/com/musicmanager/repository/PlaylistRepositoryImpl.java
+/Users/antoniobellofatto/Documents/Software Architecture/Music-Playlist-Manager---Gruppo_13/music_playlist_manager/src/main/java/com/musicmanager/repository/PlaylistRepository.java
 /Users/antoniobellofatto/Documents/Software Architecture/Music-Playlist-Manager---Gruppo_13/music_playlist_manager/src/main/java/com/musicmanager/PlayingState.java
 /Users/antoniobellofatto/Documents/Software Architecture/Music-Playlist-Manager---Gruppo_13/music_playlist_manager/src/main/java/com/musicmanager/PausedState.java
 /Users/antoniobellofatto/Documents/Software Architecture/Music-Playlist-Manager---Gruppo_13/music_playlist_manager/src/main/java/com/musicmanager/controller/RemoveTrackCommand.java

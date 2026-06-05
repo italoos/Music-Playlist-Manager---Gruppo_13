@@ -8,6 +8,8 @@ import com.musicmanager.MediaPlayerUI;
 import com.musicmanager.PlaybackEngine;
 import com.musicmanager.model.Playlist;
 import com.musicmanager.model.Track;
+import com.musicmanager.repository.PlaylistRepository;
+import com.musicmanager.repository.PlaylistRepositoryImpl;
 import com.musicmanager.repository.TrackRepository;
 import com.musicmanager.repository.TrackRepositoryImpl;
 
@@ -36,6 +38,7 @@ public class MainController {
     private final CommandManager commandManager = new CommandManager();
     private final TrackRepository trackRepository;
     private final PlaybackEngine playbackEngine;
+    private final PlaylistRepository playlistRepository;
 
     private final ObservableList<Track> tracks = FXCollections.observableArrayList();
     private final ObservableList<Playlist> playlists = FXCollections.observableArrayList();
@@ -50,11 +53,12 @@ public class MainController {
     private Playlist selectedPlaylist;
 
     public MainController() {
-        this(new TrackRepositoryImpl(), PlaybackEngine.getInstance());
+        this(new TrackRepositoryImpl(),new PlaylistRepositoryImpl(), PlaybackEngine.getInstance());
     }
 
-    MainController(TrackRepository trackRepository, PlaybackEngine playbackEngine) {
+    MainController(TrackRepository trackRepository, PlaylistRepository playlistRepository, PlaybackEngine playbackEngine) {
         this.trackRepository = trackRepository;
+        this.playlistRepository = playlistRepository;
         this.playbackEngine = playbackEngine;
     }
 
@@ -397,7 +401,7 @@ public class MainController {
     public void handleSetStrategy() {
         // TO DO: Implementare strategia di riproduzione
         // playbackEngine.setStrategy(<nuova strategia>);
-        }
+    }
     public ObservableList<Playlist> getPlaylists() {
         return playlists;
     }
@@ -445,52 +449,146 @@ public class MainController {
 
         Playlist playlist = new Playlist(playlistName);
 
-        playlists.add(playlist);
+        playlistRepository.save(playlist);
+
+        playlistRepository.save(playlist);
+        playlists.setAll(playlistRepository.findAll());
     }
 
     //metodo per la visualizzazione della sezione sulla playlist
     private void initializePlaylistSection() {
 
+        playlists.setAll(playlistRepository.findAll());
         this.playlistListView.setItems(playlists);
 
-        playlistListView.setCellFactory(listView ->
-            new ListCell<>() {
-                @Override
-                protected void updateItem(Playlist playlist, boolean empty) {
-                    super.updateItem(playlist, empty);
+        playlistListView.setCellFactory(listView -> new ListCell<Playlist>() {
 
-                    if (empty || playlist == null) {
-                        setText(null);
-                    } else {
-                        setText(playlist.getName());
+            private final Label nameLabel = new Label();
+            private final Region spacer = new Region();
+
+            private final Button playButton = new Button("▶");
+            private final Button editButton = new Button("\u270E");
+            private final Button deleteButton = new Button("🗑");
+
+            private final HBox content = new HBox(10, nameLabel, spacer, playButton, editButton, deleteButton);
+
+            {
+                HBox.setHgrow(spacer, Priority.ALWAYS);
+
+                
+                playButton.visibleProperty().bind(hoverProperty());
+                playButton.managedProperty().bind(playButton.visibleProperty());
+
+                editButton.visibleProperty().bind(hoverProperty());
+                editButton.managedProperty().bind(editButton.visibleProperty());
+
+                deleteButton.visibleProperty().bind(hoverProperty());
+                deleteButton.managedProperty().bind(deleteButton.visibleProperty());
+
+                
+                playButton.setOnAction(e -> {
+                    Playlist p = getItem();
+                    if (p != null) {
+                        handlePlayPlaylist(p);
                     }
-                }
-            }
-        );
+                });
 
-        playlistTracksListView.setCellFactory(listView ->
-            new ListCell<>() {
-                @Override
-                protected void updateItem(Track track, boolean empty) {
-                    super.updateItem(track, empty);
-
-                    if (empty || track == null) {
-                        setText(null);
-                    } else {
-                        setText(track.getTitle() + " - " + track.getAuthor());
+                editButton.setOnAction(e -> {
+                    Playlist p = getItem();
+                    if (p != null) {
+                        showEditPlaylistDialog(p);
                     }
-                }
+                });
+
+                deleteButton.setOnAction(e -> {
+                    Playlist p = getItem();
+                    if (p != null) {
+                        handleDeletePlaylist(p);
+                    }
+                });
             }
-        );
+
+            @Override
+            protected void updateItem(Playlist playlist, boolean empty) {
+                super.updateItem(playlist, empty);
+
+                if (empty || playlist == null) {
+                    setText(null);
+                    setGraphic(null);
+                    return;
+                }
+
+                nameLabel.setText(playlist.getName());
+
+                setText(null);
+                setGraphic(content);
+            }
+        });
 
         playlistListView.setOnMouseClicked(event -> {
 
-    Playlist selected = playlistListView.getSelectionModel().getSelectedItem();
+            Playlist selected = playlistListView.getSelectionModel().getSelectedItem();
 
-        if (selected != null) {
-            showPlaylistDetails(selected);
-        }
+            if (selected != null) {
+                showPlaylistDetails(selected);
+            }
         });
+    }
+
+    private void handleDeletePlaylist(Playlist playlist) {
+
+    }
+
+    private void handlePlayPlaylist(Playlist playlist) {
+
+    }
+
+    private void showEditPlaylistDialog(Playlist playlist) {
+
+        TextInputDialog dialog = new TextInputDialog(playlist.getName());
+        dialog.setTitle("Modifica playlist");
+        dialog.setHeaderText("Inserisci il nuovo nome della playlist");
+
+        Optional<String> result = dialog.showAndWait();
+
+        result.ifPresent(newName -> {
+
+            String trimmedName = newName.trim();
+
+            
+            if (trimmedName.isEmpty()) {
+                showInvalidPlaylistNameAlert("Il nome non può essere vuoto.");
+                return;
+            }
+
+            
+            boolean alreadyExists = playlists.stream()
+                    .anyMatch(p ->
+                            p.getName().equalsIgnoreCase(trimmedName)
+                            && p != playlist
+                    );
+
+            if (alreadyExists) {
+                showInvalidPlaylistNameAlert("Esiste già una playlist con questo nome.");
+                return;
+            }
+
+            String oldName = playlist.getName();
+            playlist.setName(trimmedName);
+
+            playlistRepository.update(playlist);
+
+            playlistListView.refresh();
+        });
+    }
+
+    private void showInvalidPlaylistNameAlert(String message) {
+
+        Alert alert = new Alert(Alert.AlertType.ERROR);
+        alert.setTitle("Errore");
+        alert.setHeaderText("Nome playlist non valido");
+        alert.setContentText(message);
+        alert.showAndWait();
     }
 
     private void showPlaylistsView() {
@@ -511,13 +609,17 @@ public class MainController {
 
     private void showPlaylistDetails(Playlist playlist) {
 
-        selectedPlaylist = playlist;
+        Playlist fullPlaylist = playlistRepository.findById(playlist.getId());
 
-        this.detailsTitleLabel.setText(playlist.getName());
+        if (fullPlaylist == null) return;
+
+        selectedPlaylist = fullPlaylist;
+
+        this.detailsTitleLabel.setText(fullPlaylist.getName());
 
         playlistTracksListView.setItems(
                 FXCollections.observableArrayList(
-                        playlist.getTracks()
+                        fullPlaylist.getTracks()
                 )
         );
 
