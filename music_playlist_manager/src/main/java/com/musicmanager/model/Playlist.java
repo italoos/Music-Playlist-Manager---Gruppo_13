@@ -1,5 +1,41 @@
 package com.musicmanager.model;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Playlist {
 
+    private String name;
+    private int playCount;
+    private List<Track> tracks;
+
+    public Playlist(String name) {
+        this.name = name;
+        this.playCount = 0;
+        this.tracks = new ArrayList<>();
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void addTrack(Track track) {
+        tracks.add(track);
+    }
+
+    public void removeTrack(Track track) {
+        tracks.remove(track);
+    }
+
+    public List<Track> getTracks() {
+        return tracks;
+    }
+
+    public int indexOf(Track track) {
+        return tracks.indexOf(track);
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
 }

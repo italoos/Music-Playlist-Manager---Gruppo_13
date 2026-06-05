@@ -6,9 +6,11 @@ import java.util.Optional;
 
 import com.musicmanager.MediaPlayerUI;
 import com.musicmanager.PlaybackEngine;
+import com.musicmanager.model.Playlist;
 import com.musicmanager.model.Track;
 import com.musicmanager.repository.TrackRepository;
 import com.musicmanager.repository.TrackRepositoryImpl;
+
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -17,15 +19,16 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
-import javafx.stage.FileChooser;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextInputDialog;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
+import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
 public class MainController { 
@@ -35,6 +38,16 @@ public class MainController {
     private final PlaybackEngine playbackEngine;
 
     private final ObservableList<Track> tracks = FXCollections.observableArrayList();
+    private final ObservableList<Playlist> playlists = FXCollections.observableArrayList();
+    @FXML
+    private ListView<Playlist> playlistListView;
+    @FXML
+    private ListView<Track> playlistTracksListView;
+    @FXML
+    private Label detailsTitleLabel;
+    @FXML
+    private Button backButton;
+    private Playlist selectedPlaylist;
 
     public MainController() {
         this(new TrackRepositoryImpl(), PlaybackEngine.getInstance());
@@ -70,6 +83,7 @@ public class MainController {
         /*Track track = new Track(0, "Short", "Antonio", 10, "Metal", 2010);
         trackRepository.save(track);
         tracks.add(track);*/
+        initializePlaylistSection();
         loadTracksFromDatabase();
     }
 
@@ -378,6 +392,144 @@ public class MainController {
         }
 
         handlePlay();
+    }
+
+    public ObservableList<Playlist> getPlaylists() {
+        return playlists;
+    }
+    
+    //metodo per la validazione del nome della Playlist
+    private boolean isValidPlaylistName(String name) {
+
+        if (name == null || name.trim().isEmpty()) {
+            return false;
+        }
+
+        return playlists.stream().noneMatch(p -> p.getName().equalsIgnoreCase(name.trim()));
+    }
+
+
+    //metodo per la creazione di una Playlist da form 
+    @FXML
+    public void handleCreatePlaylist() {
+
+        TextInputDialog dialog = new TextInputDialog();
+
+        dialog.setTitle("Nuova Playlist");
+        dialog.setHeaderText("Inserisci il nome della playlist");
+
+        Optional<String> result = dialog.showAndWait();
+
+        if (result.isEmpty()) {
+            return;
+        }
+
+        String playlistName = result.get().trim();
+
+        if (!isValidPlaylistName(playlistName)) {
+
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Errore");
+            alert.setHeaderText("Nome non valido");
+            alert.setContentText(
+                    "Il nome è vuoto oppure esiste già una playlist con questo nome."
+            );
+
+            alert.showAndWait();
+            return;
+        }
+
+        Playlist playlist = new Playlist(playlistName);
+
+        playlists.add(playlist);
+    }
+
+    //metodo per la visualizzazione della sezione sulla playlist
+    private void initializePlaylistSection() {
+
+        this.playlistListView.setItems(playlists);
+
+        playlistListView.setCellFactory(listView ->
+            new ListCell<>() {
+                @Override
+                protected void updateItem(Playlist playlist, boolean empty) {
+                    super.updateItem(playlist, empty);
+
+                    if (empty || playlist == null) {
+                        setText(null);
+                    } else {
+                        setText(playlist.getName());
+                    }
+                }
+            }
+        );
+
+        playlistTracksListView.setCellFactory(listView ->
+            new ListCell<>() {
+                @Override
+                protected void updateItem(Track track, boolean empty) {
+                    super.updateItem(track, empty);
+
+                    if (empty || track == null) {
+                        setText(null);
+                    } else {
+                        setText(track.getTitle() + " - " + track.getAuthor());
+                    }
+                }
+            }
+        );
+
+        playlistListView.setOnMouseClicked(event -> {
+
+    Playlist selected = playlistListView.getSelectionModel().getSelectedItem();
+
+        if (selected != null) {
+            showPlaylistDetails(selected);
+        }
+        });
+    }
+
+    private void showPlaylistsView() {
+
+        selectedPlaylist = null;
+
+        this.detailsTitleLabel.setText("Playlist");
+
+        playlistListView.setVisible(true);
+        playlistListView.setManaged(true);
+
+        playlistTracksListView.setVisible(false);
+        playlistTracksListView.setManaged(false);
+
+        backButton.setVisible(false);
+        backButton.setManaged(false);
+    }
+
+    private void showPlaylistDetails(Playlist playlist) {
+
+        selectedPlaylist = playlist;
+
+        this.detailsTitleLabel.setText(playlist.getName());
+
+        playlistTracksListView.setItems(
+                FXCollections.observableArrayList(
+                        playlist.getTracks()
+                )
+        );
+
+        playlistListView.setVisible(false);
+        playlistListView.setManaged(false);
+
+        playlistTracksListView.setVisible(true);
+        playlistTracksListView.setManaged(true);
+
+        backButton.setVisible(true);
+        backButton.setManaged(true);
+    }
+
+    @FXML
+    private void handleBackToPlaylists() {
+        showPlaylistsView();
     }
 
     /*
