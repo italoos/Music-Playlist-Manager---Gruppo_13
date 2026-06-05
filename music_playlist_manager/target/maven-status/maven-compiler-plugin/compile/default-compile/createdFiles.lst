@@ -1,9 +1,0 @@
-com\musicmanager\MediaPlayerUI.class
-com\musicmanager\PlayingState.class
-com\musicmanager\PlaybackObserver.class
-com\musicmanager\MediaPlayerUI$1.class
-module-info.class
-com\musicmanager\PlayerState.class
-com\musicmanager\PausedState.class
-com\musicmanager\database\DatabaseManager.class
-com\musicmanager\PlaybackEngine.class
