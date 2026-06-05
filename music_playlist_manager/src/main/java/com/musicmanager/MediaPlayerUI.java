@@ -3,6 +3,7 @@ package com.musicmanager;
 import com.musicmanager.controller.MainController;
 import com.musicmanager.model.Playlist;
 import com.musicmanager.model.Track;
+
 import javafx.animation.AnimationTimer;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -40,7 +41,7 @@ public class MediaPlayerUI extends HBox implements PlaybackObserver {
     private void initComponents() {
         trackLabel = new Label("Nessuna traccia selezionata");
         timeLabel = new Label("00:00 / 00:00");
-        playButton = new Button("▶"); // Unicode per simbolo play
+        playButton = new Button("▶");
         progressBar = new ProgressBar(0);
 
         trackLabel.setMaxWidth(Double.MAX_VALUE);
