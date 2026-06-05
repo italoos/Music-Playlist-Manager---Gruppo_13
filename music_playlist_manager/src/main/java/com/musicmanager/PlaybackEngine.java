@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.musicmanager.model.Playlist;
 import com.musicmanager.model.Track;
+import com.musicmanager.controller.PlaybackStrategy;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.util.Duration;
@@ -19,6 +20,7 @@ public class PlaybackEngine {
     private int currentTime;
     private Timeline timeline;
     private PlayerState currentState;
+    private PlaybackStrategy strategy;
 
     private PlaybackEngine() {
         this(true);
@@ -119,6 +121,10 @@ public class PlaybackEngine {
 
     public void setState(PlayerState state) {
         this.currentState = state;
+    }
+
+    public void setStrategy(PlaybackStrategy strategy) {
+        this.strategy = strategy;
     }
 
     //Controlla se il MediaPlayer è attualmente in riproduzione
