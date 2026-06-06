@@ -160,25 +160,6 @@ public class MainController {
             }
         }
 
-        /**
-         * Mostra un dialog di conferma prima di eliminare una playlist. Se l'utente conferma, chiama il metodo handleRemovePlaylist per eseguire l'eliminazione.
-         * @param playlist La playlist da eliminare. Deve essere una playlist già presente nella lista e nel repository. Se è null, non viene eseguita alcuna operazione e viene mostrato un messaggio di avviso.
-         */
-        private void confirmAndDeletePlaylist(Playlist playlist) {
-            if (playlist == null) {
-                return;
-            }
-
-            Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
-            confirmAlert.setTitle("Conferma eliminazione");
-            confirmAlert.setHeaderText("Eliminare la playlist?");
-            confirmAlert.setContentText("Sei sicuro di voler eliminare la playlist \"" + playlist.getName() + "\"?\nQuesta azione rimuoverà la playlist dal sistema.");
-
-            java.util.Optional<ButtonType> result = confirmAlert.showAndWait();
-            if (result.isPresent() && result.get() == ButtonType.OK) {
-                handleRemovePlaylist();
-            }
-        }
 
         /**
          * Mostra un dialog per l'editing di una traccia.
@@ -553,18 +534,6 @@ public class MainController {
     }
 
     /**
-     * Gestisce la rimozione di una playlist selezionata.
-     */
-    @FXML
-    public void handleRemovePlaylist() {
-        Playlist selectedPlaylist = playlistListView.getSelectionModel().getSelectedItem();
-
-        if (selectedPlaylist != null) {
-            playlists.remove(selectedPlaylist);
-        }
-    }
-
-    /**
      * Inizializza la sezione delle playlist.
      */
     private void initializePlaylistSection() {
@@ -614,7 +583,7 @@ public class MainController {
                 deleteButton.setOnAction(e -> {
                     Playlist p = getItem();
                     if (p != null) {
-                        handleDeletePlaylist(p);
+                        confirmAndDeletePlaylist(p);
                     }
                 });
             }
@@ -646,12 +615,45 @@ public class MainController {
         });
     }
 
-    private void handleDeletePlaylist(Playlist playlist) {
+    private void handlePlayPlaylist(Playlist playlist) {
 
     }
 
-    private void handlePlayPlaylist(Playlist playlist) {
+    /**
+     * Mostra un dialog di conferma prima di eliminare una playlist. Se l'utente conferma, chiama il metodo handleRemovePlaylist per eseguire l'eliminazione.
+     * @param playlist La playlist da eliminare. Deve essere una playlist già presente nella lista e nel repository. Se è null, non viene eseguita alcuna operazione e viene mostrato un messaggio di avviso.
+     */
+    private void confirmAndDeletePlaylist(Playlist playlist) {
+        if (playlist == null) {
+            return;
+        }
 
+        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmAlert.setTitle("Conferma eliminazione");
+        confirmAlert.setHeaderText("Eliminare la playlist?");
+        confirmAlert.setContentText("Sei sicuro di voler eliminare la playlist \"" + playlist.getName() + "\"?\nQuesta azione rimuoverà la playlist dal sistema.");
+
+        java.util.Optional<ButtonType> result = confirmAlert.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            handleDeletePlaylist(playlist);
+        }
+    }
+
+    /**
+     * Gestisce la rimozione di una playlist selezionata.
+     */
+    @FXML
+    public void handleDeletePlaylist(Playlist playlist) {
+        Playlist target = playlist != null ? playlist : playlistListView.getSelectionModel().getSelectedItem();
+
+        if (target != null) {
+            playlistRepository.delete(target.getId());
+            playlistListView.getItems().remove(target);
+            playlistListView.refresh();
+
+            //todo sistemare il refresh della lista dopo eliminazione playlist
+
+        }
     }
 
     /**
