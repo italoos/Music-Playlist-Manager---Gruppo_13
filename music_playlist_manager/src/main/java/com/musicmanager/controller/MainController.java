@@ -650,9 +650,6 @@ public class MainController {
             playlistRepository.delete(target.getId());
             playlistListView.getItems().remove(target);
             playlistListView.refresh();
-
-            //todo sistemare il refresh della lista dopo eliminazione playlist
-
         }
     }
 
