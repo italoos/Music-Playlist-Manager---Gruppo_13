@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import com.musicmanager.MediaPlayerUI;
 import com.musicmanager.PlaybackEngine;
+import com.musicmanager.PlaybackStrategy;
 import com.musicmanager.model.Playlist;
 import com.musicmanager.model.Track;
 import com.musicmanager.repository.PlaylistRepository;
@@ -424,6 +425,7 @@ public class MainController {
         }
 
         tracksListView.getSelectionModel().select(track);
+        playbackEngine.setCurrentPlaylist(createPlaylistFromTracks());
         playbackEngine.setCurrentTrack(track);
         playbackEngine.play();
         System.out.println("[MAIN CONTROLLER] INFO: Play requested for track: " + track.getTitle() + ".");
@@ -465,9 +467,12 @@ public class MainController {
         handlePlay();
     }
 
-    public void handleSetStrategy() {
-        // TO DO: Implementare strategia di riproduzione
-        // playbackEngine.setStrategy(<nuova strategia>);
+    /**
+     * Imposta la strategia di riproduzione. Riceve una strategia di riproduzione e la passa al motore di riproduzione per modificare il comportamento di riproduzione. Ad esempio, se si riceve una TrackLoopStrategy, il motore di riproduzione dovrebbe essere configurato per ripetere la traccia corrente indefinitamente finché non viene cambiata la traccia o la strategia.
+     * @param strategy La strategia di riproduzione da impostare. Deve essere una strategia valida che implementa l'interfaccia PlaybackStrategy. Se è null, non viene eseguita alcuna operazione e viene mostrato un messaggio di avviso.
+     */
+    public void handleSetStrategy(PlaybackStrategy strategy) {
+        playbackEngine.setStrategy(strategy);
     }
 
     /**
@@ -615,8 +620,41 @@ public class MainController {
         });
     }
 
-    private void handlePlayPlaylist(Playlist playlist) {
+    /**
+     * Gestisce l riproduzione della sezione "Tutti i brani".
+     */
+    @FXML
+    public void handlePlayAllTracks() {
+        Playlist playlist = createPlaylistFromTracks();
+        handlePlayPlaylist(playlist);
+    }
 
+    /**
+     * Genera una playlist per la compatibilità con il playback engine nell'inizializzazione della coda di riproduzione.
+     * @return Plylist contenente tutte le tracce musicali.
+     */
+    private Playlist createPlaylistFromTracks() {
+        Playlist playlist = new Playlist("Tutti i brani");
+        playlist.getTracks().addAll(tracks);
+        return playlist;
+    }
+
+    /**
+     * Gestisce il click del tasto play associato alle playlist avviando la riproduzione delle traccie contenute nella playlist coerentemente con la Playback Strategy.
+     * @param playlist La Playlist di cui iniziare la riproduzione.
+     */
+    private void handlePlayPlaylist(Playlist playlist) {
+        if (playlist == null || playlist.getTracks().isEmpty()) {
+            System.out.println("[MAIN CONTROLLER] WARNING: No playlist selected or playlist is empty.");
+            return;
+        }
+
+        selectedPlaylist = playlist;
+        playbackEngine.setCurrentPlaylist(selectedPlaylist);
+        playbackEngine.setCurrentTrack(selectedPlaylist.getTracks().get(0));
+        playbackEngine.play();
+
+        System.out.println("[MAIN CONTROLLER] INFO: Play requested for playlist: " + playlist.getName() + ".");
     }
 
     /**
