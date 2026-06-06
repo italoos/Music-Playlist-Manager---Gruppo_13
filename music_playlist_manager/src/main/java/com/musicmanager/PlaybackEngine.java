@@ -22,10 +22,17 @@ public class PlaybackEngine {
     private PlaybackStrategy strategy;
     
 
+    /**
+     * Costruttore privato per creare un'istanza di PlaybackEngine.
+     */
     private PlaybackEngine() {
         this(true);
     }
 
+    /**
+     * Costruttore privato per creare un'istanza di PlaybackEngine. Se initializeTimeline è true, viene inizializzato il timeline per aggiornare il tempo di riproduzione.
+     * @param initializeTimeline Indica se inizializzare il timeline per aggiornare il tempo di riproduzione. Se false, il timeline non viene creato, utile per i test unitari.
+     */
     private PlaybackEngine(boolean initializeTimeline) {
         currentState = new PausedState();
         currentTime = 0;
@@ -38,6 +45,9 @@ public class PlaybackEngine {
         }
     }
 
+    /**
+     * Inizializza il timeline per aggiornare il tempo di riproduzione.
+     */
     private void initTimeline() {
         timeline = new Timeline(
             new KeyFrame(Duration.seconds(1), e -> {
@@ -65,6 +75,10 @@ public class PlaybackEngine {
         timeline.play();
     }
 
+    /**
+     * Restituisce l'istanza singleton di PlaybackEngine. Se l'istanza non esiste, viene creata una nuova istanza.
+     * @return L'istanza singleton di PlaybackEngine.
+     */
     public static PlaybackEngine getInstance() {
         if (instance == null) {
             instance = new PlaybackEngine();
@@ -72,11 +86,19 @@ public class PlaybackEngine {
         return instance;
     }
 
+    /**
+     * Restituisce un'istanza di PlaybackEngine senza inizializzare il timeline, utile per i test unitari.
+     * @return Un'istanza di PlaybackEngine senza inizializzare il timeline.
+     */
     static PlaybackEngine getTestInstance() {
         instance = new PlaybackEngine(false);
         return instance;
     }
 
+    /**
+     * Registra un osservatore per ricevere aggiornamenti sullo stato di riproduzione. Se l'osservatore è già registrato, non viene aggiunto nuovamente.
+     * @param o L'osservatore da registrare per ricevere aggiornamenti sullo stato di riproduzione.
+     */
     public void registerObserver(PlaybackObserver o) {
         if (observers.contains(o)) {
             return;
@@ -85,6 +107,9 @@ public class PlaybackEngine {
         observers.add(o);
     }
 
+    /**
+     * Notifica tutti gli osservatori dell'aggiornamento dello stato di riproduzione.
+     */
     public void notifyObservers() {
         for (PlaybackObserver o : observers) {
             o.update(
@@ -96,41 +121,73 @@ public class PlaybackEngine {
         }
     }
 
+    /**
+     * Inizia la riproduzione della traccia corrente.
+     */
     public void play() {
         currentState.play(this);
     }
 
+    /**
+     * Mette in pausa la riproduzione della traccia corrente.
+     */
     public void pause() {
         currentState.pause(this);
     }
 
+    /**
+     * Passa alla traccia successiva.
+     */
     public void skip() {
         currentState.skip(this);
     }
 
+    /**
+     * Imposta la traccia corrente.
+     * @param currentTrack La traccia da impostare come corrente.
+     */
     public void setCurrentTrack(Track currentTrack) {
         this.currentTrack = currentTrack;
         this.currentTime = 0;
         notifyObservers();
     }
 
+    /**
+     * Imposta la playlist corrente.
+     * @param currentPlaylist La playlist da impostare come corrente.
+     */
     public void setCurrentPlaylist(Playlist currentPlaylist) {
         this.currentPlaylist = currentPlaylist;
     }
 
+    /**
+     * Restituisce la traccia attualmente in riproduzione.
+     * @return La traccia attualmente in riproduzione.
+     */
     public Track getCurrentTrack() {
         return currentTrack;
     }
 
+    /**
+     * Restituisce la playlist attualmente in riproduzione.
+     * @param state Lo stato da impostare per il player.
+     */
     public void setState(PlayerState state) {
         this.currentState = state;
     }
 
+    /**
+     * Imposta la strategia di riproduzione da utilizzare per la riproduzione delle tracce.
+     * @param strategy La strategia di riproduzione da utilizzare per la riproduzione delle tracce.
+     */
     public void setStrategy(PlaybackStrategy strategy) {
         this.strategy = strategy;
     }
 
-    //Controlla se il MediaPlayer è attualmente in riproduzione
+    /**
+     * Restituisce true se la traccia è attualmente in riproduzione, false altrimenti.
+     * @return true se la traccia è attualmente in riproduzione, false altrimenti.
+     */
     public boolean isPlaying() {
         return currentState instanceof PlayingState;
     }

@@ -21,6 +21,12 @@ public class ShuffleStrategy implements PlaybackStrategy {
 
     private List<Track> shuffledTracks = new ArrayList<>();
 
+    /**
+     * Restituisce un brano casuale dalla lista dei brani.
+     * @param tracks La lista dei brani da cui scegliere il brano successivo.
+     * @param currentIndex L'indice del brano corrente nella lista dei brani.
+     * @return Un brano casuale dalla lista dei brani.
+     */
     @Override
     public Track getNext(List<Track> tracks, int currentIndex) {
 

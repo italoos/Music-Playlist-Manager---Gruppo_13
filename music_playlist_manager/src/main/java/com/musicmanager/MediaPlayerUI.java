@@ -35,10 +35,17 @@ public class MediaPlayerUI extends HBox implements PlaybackObserver {
         initSmoothAnimation();
     }
 
+    /**
+     * Imposta il controller per gestire le azioni dell'interfaccia utente.
+     * @param controller Il controller da associare all'interfaccia utente.
+     */
     public void setController(MainController controller) {
         this.controller = controller;
     }
 
+    /**
+     * Inizializza i componenti dell'interfaccia utente.
+     */
     private void initComponents() {
         trackLabel = new Label("Nessuna traccia selezionata");
         timeLabel = new Label("00:00 / 00:00");
@@ -56,11 +63,17 @@ public class MediaPlayerUI extends HBox implements PlaybackObserver {
         progressBar.setStyle("-fx-accent: #1DB954;");
     }
 
+    /**
+     * Inizializza le azioni per i componenti dell'interfaccia utente.
+     */
     private void initActions() {
         playButton.setOnAction(e -> handlePlaybackAction());
         trackLoopButton.setOnAction(e -> handleTrackLoopAction());
     }
 
+    /**
+     * Gestisce l'azione di riproduzione/pausa.
+     */
     private void handlePlaybackAction() {
         if (controller == null) {
             return;
@@ -69,6 +82,9 @@ public class MediaPlayerUI extends HBox implements PlaybackObserver {
         controller.handleTogglePlayback();
     }
 
+    /**
+     * Gestisce l'azione di loop della traccia.
+     */
     private void handleTrackLoopAction() {
         if (controller == null) {
             return;
@@ -77,6 +93,9 @@ public class MediaPlayerUI extends HBox implements PlaybackObserver {
         //controller.handleToggleTrackLoop();
     }
 
+    /**
+     * Crea il layout dell'interfaccia utente.
+     */
     private void createLayout() {
         setAlignment(Pos.CENTER_LEFT);
         setSpacing(12);
@@ -90,6 +109,13 @@ public class MediaPlayerUI extends HBox implements PlaybackObserver {
         getChildren().addAll(playButton, trackLabel, progressBar, timeLabel);
     }
 
+    /**
+     * Aggiorna l'interfaccia utente in base allo stato attuale del MediaPlayer.
+     * @param currentTrack La traccia attualmente in riproduzione.
+     * @param currentPlaylist La playlist attualmente in riproduzione.
+     * @param currentTime Il tempo attuale della traccia.
+     * @param isPlaying Indica se la traccia è in riproduzione.
+     */
     @Override
     public void update(Track currentTrack, Playlist currentPlaylist, int currentTime, boolean isPlaying) {
         playButton.setText(isPlaying ? "⏸" : "▶"); // Unicode per simbolo pause e play
@@ -119,6 +145,9 @@ public class MediaPlayerUI extends HBox implements PlaybackObserver {
         }
     }
 
+    /**
+     * Inizializza l'animazione fluida per la barra di avanzamento.
+     */
     private void initSmoothAnimation() {
         AnimationTimer timer = new AnimationTimer() {
 
@@ -132,6 +161,10 @@ public class MediaPlayerUI extends HBox implements PlaybackObserver {
         timer.start();
     }
 
+    /**
+     * Mostra un messaggio informativo all'utente.
+     * @param message Il messaggio da visualizzare nell'alert.
+     */
     public void showMessage(String message) {
         Alert alert = new Alert(AlertType.INFORMATION);
 
