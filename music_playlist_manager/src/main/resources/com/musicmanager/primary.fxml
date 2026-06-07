@@ -74,6 +74,14 @@
                         managed="false"
                         onAction="#handleBackToPlaylists"/>
 
+                  <Button fx:id="addTrackToPlaylistButton"
+                        layoutX="85.0"
+                        layoutY="50.0"
+                        text="+ Traccia"
+                        visible="false"
+                        managed="false"
+                        onAction="#handleDetailedAddTrack"/>
+
                   <ListView fx:id="playlistListView"
                            layoutX="14.0"
                            layoutY="50.0"
