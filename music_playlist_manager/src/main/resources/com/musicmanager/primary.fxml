@@ -81,6 +81,16 @@
                         visible="false"
                         managed="false"
                         onAction="#handleDetailedAddTrack"/>
+                  
+                  <Button fx:id="playPlaylistButton"
+                        prefHeight="28.0"
+                        prefWidth="40.0"
+                        text="▶"
+                        visible="false"
+                        managed="false"
+                        AnchorPane.rightAnchor="14.0"
+                        AnchorPane.topAnchor="50.0"
+                        onAction="#handlePlayPlaylistButton"/>
 
                   <ListView fx:id="playlistListView"
                            layoutX="14.0"

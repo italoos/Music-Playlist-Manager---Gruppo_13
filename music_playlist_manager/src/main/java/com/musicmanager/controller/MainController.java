@@ -54,6 +54,8 @@ public class MainController {
     private Button backButton;
     @FXML
     private Button addTrackToPlaylistButton;
+    @FXML
+    private Button playPlaylistButton;
 
     private Playlist selectedPlaylist;
 
@@ -821,6 +823,14 @@ public class MainController {
     }
 
     /**
+     * Metodo pubblico richiamato dal bottone play nella sezione di dettaglio della playlist.
+     */
+    @FXML
+    public void handlePlayPlaylistButton() {
+        handlePlayPlaylist(selectedPlaylist);
+    }
+
+    /**
      * Mostra un dialog di conferma prima di eliminare una playlist. Se l'utente conferma, chiama il metodo handleRemovePlaylist per eseguire l'eliminazione.
      * @param playlist La playlist da eliminare. Deve essere una playlist già presente nella lista e nel repository. Se è null, non viene eseguita alcuna operazione e viene mostrato un messaggio di avviso.
      */
@@ -931,6 +941,9 @@ public class MainController {
         addTrackToPlaylistButton.setVisible(false);
         addTrackToPlaylistButton.setManaged(false);
 
+        playPlaylistButton.setVisible(false);
+        playPlaylistButton.setManaged(false);
+
     }
 
     /**
@@ -964,6 +977,9 @@ public class MainController {
 
         addTrackToPlaylistButton.setVisible(true);
         addTrackToPlaylistButton.setManaged(true);
+
+        playPlaylistButton.setVisible(true);
+        playPlaylistButton.setManaged(true);
 
     }
 
