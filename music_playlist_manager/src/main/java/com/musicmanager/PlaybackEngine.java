@@ -114,6 +114,10 @@ public class PlaybackEngine {
         notifyObservers();
     }
 
+    public Playlist getCurrentPlaylist() {
+        return this.currentPlaylist;
+    }
+
     public void setCurrentPlaylist(Playlist currentPlaylist) {
         this.currentPlaylist = currentPlaylist;
     }
@@ -143,33 +147,43 @@ public class PlaybackEngine {
      * viene interrotta e il player passa allo stato Paused.
      */
     public void nextTrack() {
+        
+        if (currentTrack == null) {
+            return;
+        }
 
-        if(currentPlaylist == null || currentTrack == null) {
+        if (currentPlaylist == null) {
+            setCurrentTrack(null);
+            currentTime = 0;
+            setState(new PausedState());
+            notifyObservers();
             return;
         }
     
-        int currentIndex =
-                currentPlaylist.indexOf(currentTrack);
+        int currentIndex = currentPlaylist.indexOf(currentTrack);
     
-        Track nextTrack =
-                strategy.getNext(
-                    currentPlaylist.getTracks(),
-                    currentIndex
-                );
+        Track nextTrack = strategy.getNext(currentPlaylist.getTracks(), currentIndex);
     
-        if(nextTrack == null) {
-    
+        if (nextTrack == null) {
             currentTime = 0;
-    
+            setCurrentTrack(null); 
             setState(new PausedState());
-    
             notifyObservers();
-    
             return;
         }
     
         setCurrentTrack(nextTrack);
-    
         play();
+
     }
+
+    /** Sincronizza le modifiche della playlist corrente con la UI. */
+
+    public void handlePlaylistModification(Playlist playlist) {
+        if (this.currentPlaylist != null && this.currentPlaylist.getId() == playlist.getId()) {
+            this.currentPlaylist = playlist;
+            notifyObservers();
+        }
+    }
+
 }

@@ -42,6 +42,7 @@ public class MainController {
 
     private final ObservableList<Track> tracks = FXCollections.observableArrayList();
     private final ObservableList<Playlist> playlists = FXCollections.observableArrayList();
+
     @FXML
     private ListView<Playlist> playlistListView;
     @FXML
@@ -50,6 +51,9 @@ public class MainController {
     private Label detailsTitleLabel;
     @FXML
     private Button backButton;
+    @FXML
+    private Button addTrackToPlaylistButton;
+
     private Playlist selectedPlaylist;
 
     public MainController() {
@@ -81,6 +85,7 @@ public class MainController {
         tracksListView.setPlaceholder(new Label("I tuoi brani musicali saranno visualizzati qui"));
         tracksListView.setItems(tracks);
         tracksListView.setCellFactory(listView -> new TrackListCell());
+        playlistTracksListView.setCellFactory(listView -> new PlaylistTrackListCell());
         mediaPlayerUI.setController(this);
         playbackEngine.registerObserver(mediaPlayerUI);
         playbackEngine.notifyObservers();
@@ -206,6 +211,47 @@ public class MainController {
         }
     }
 
+    private class PlaylistTrackListCell extends ListCell<Track> {
+
+        private final Label trackLabel = new Label();
+        private final Region spacer = new Region();
+        private final Button removeButton = new Button("- Rimuovi");
+        private final HBox content = new HBox(16, trackLabel, spacer, removeButton);
+
+        private PlaylistTrackListCell() {
+            HBox.setHgrow(spacer, Priority.ALWAYS);
+            trackLabel.setMaxWidth(Double.MAX_VALUE);
+
+            removeButton.visibleProperty().bind(hoverProperty());
+            removeButton.managedProperty().bind(removeButton.visibleProperty());
+
+            removeButton.setOnAction(event -> {
+                Track track = getItem();
+
+                if (track != null) {
+                    handleRemoveTrackFromSelectedPlaylist(track);
+                }
+            });
+        }
+
+        @Override
+        protected void updateItem(Track track, boolean empty) {
+            super.updateItem(track, empty);
+
+            if (empty || track == null) {
+                setText(null);
+                setGraphic(null);
+                return;
+            }
+
+            trackLabel.setText(track.getTitle() + " - " + track.getAuthor()
+                    + "  (" + track.getGenre() + ", " + track.getYear() + ")");
+
+            setText(null);
+            setGraphic(content);
+        }
+    }
+
     /**
      * Recupera tutti i brani dal database e li rende disponibili alla GUI.
      */
@@ -301,7 +347,7 @@ public class MainController {
     public void handleUpdateTrack(Track track, Track updatedTrack) {
 
         if (track == null || updatedTrack == null) {
-            System.out.println("[MAIN CONTROLLER] WARNING: Cannot update track (invalid input).");
+            System.out.println("[MAIN CONTROLLER] WARNING: Invalid input parameters.");
             return;
         }
 
@@ -319,6 +365,14 @@ public class MainController {
 
         trackRepository.update(track);
 
+        if (selectedPlaylist != null && selectedPlaylist.getTracks().contains(track)) {
+            refreshPlaylistDetailsUI();
+        }
+
+        if (playbackEngine.getCurrentTrack() != null && playbackEngine.getCurrentTrack().getId() == track.getId()) {
+            playbackEngine.notifyObservers();
+        }
+
         System.out.println("[MAIN CONTROLLER] INFO: Track updated successfully (ID: " + track.getId() + ").");
 
     }
@@ -329,12 +383,98 @@ public class MainController {
     public void handleDeleteTrack(Track track) {
 
         if (track == null) {
-            System.out.println("[MAIN CONTROLLER] WARNING: No track selected for deletion.");
+            System.out.println("[MAIN CONTROLLER] WARNING: Invalid input parameters.");
             return;
         }
 
-        Command command = new RemoveTrackCommand(track, trackRepository, tracks);
+        Command command = new RemoveTrackCommand(track, trackRepository, playlistRepository, tracks);
         commandManager.executeCommand(command);
+
+        if (selectedPlaylist != null) {
+            refreshPlaylistDetailsUI();
+        }
+
+        System.out.println("[MAIN CONTROLLER] INFO: Track deleted successfully (ID: " + track.getId() + ").");
+
+    }
+
+    /** Aggiunge un brano musicale a una playlist. */
+
+    public void handleAddTrackToPlaylist(Track track, Playlist playlist) {
+
+        if (track == null || playlist == null) {
+            System.out.println("[MAIN CONTROLLER] WARNING: Invalid input parameters.");
+            return;
+        }
+
+        Command command = new AddTrackToPlaylistCommand(playlist, track, playlistRepository);
+        commandManager.executeCommand(command);
+
+        if (selectedPlaylist != null && selectedPlaylist.getId() == playlist.getId()) {
+            refreshPlaylistDetailsUI();
+        }
+
+        System.out.println("[MAIN CONTROLLER] INFO: Track added to playlist successfully (Track ID: " + track.getId() + ", Playlist ID: " + playlist.getId() + ").");
+
+    }
+
+    @FXML
+    private void handleDetailedAddTrack() {
+
+        Track track = tracksListView.getSelectionModel().getSelectedItem();
+
+        if (selectedPlaylist == null) {
+            showPlaylistOperationAlert("Nessuna playlist selezionata", "Seleziona una playlist prima di aggiungere una traccia.");
+            return;
+        }
+
+        if (track == null) {
+            showPlaylistOperationAlert("Nessuna traccia selezionata", "Seleziona una traccia dal catalogo generale.");
+            return;
+        }
+
+        if (selectedPlaylist.getTracks().contains(track)) {
+            showPlaylistOperationAlert("Traccia già presente", "La traccia selezionata è già presente nella playlist.");
+            return;
+        }
+
+        handleAddTrackToPlaylist(track, selectedPlaylist);
+
+    }
+
+    /** Rimuove un brano musicale da una playlist. */
+
+    public void handleRemoveTrackFromPlaylist(Track track, Playlist playlist) {
+
+        if (track == null || playlist == null) {
+            System.out.println("[MAIN CONTROLLER] WARNING: Invalid input parameters.");
+            return;
+        }
+
+        Command command = new RemoveTrackFromPlaylistCommand(playlist, track, playlistRepository);
+        commandManager.executeCommand(command);
+
+        if (selectedPlaylist != null && selectedPlaylist.getId() == playlist.getId()) {
+            refreshPlaylistDetailsUI();
+        }
+
+        System.out.println("[MAIN CONTROLLER] INFO: Track removed from playlist successfully (Track ID: " + track.getId() + ", Playlist ID: " + playlist.getId() + ").");
+
+    }
+
+    private void handleRemoveTrackFromSelectedPlaylist(Track track) {
+
+        if (selectedPlaylist == null) {
+            showPlaylistOperationAlert("Nessuna playlist selezionata", "Seleziona una playlist prima di rimuovere una traccia.");
+            return;
+        }
+
+        if (track == null) {
+            showPlaylistOperationAlert("Nessuna traccia selezionata", "Seleziona una traccia dalla playlist.");
+            return;
+        }
+
+        handleRemoveTrackFromPlaylist(track, selectedPlaylist);
 
     }
 
@@ -343,6 +483,29 @@ public class MainController {
     @FXML
     public void handleUndo() {
         commandManager.undoLastCommand();
+        if (selectedPlaylist != null) {
+            refreshPlaylistDetailsUI();
+        }
+    }
+
+    /** Aggiorna la UI della playlist con i dati aggiornati presenti nel repository. */
+
+    private void refreshPlaylistDetailsUI() {
+        if (selectedPlaylist != null) {
+            Playlist updated = playlistRepository.findById(selectedPlaylist.getId());
+            if (updated != null) {
+                selectedPlaylist = updated;
+                playlistTracksListView.setItems(FXCollections.observableArrayList(updated.getTracks()));
+            }
+        }
+    }
+
+    private void showPlaylistOperationAlert(String header, String content) {
+        Alert alert = new Alert(Alert.AlertType.WARNING);
+        alert.setTitle("Playlist");
+        alert.setHeaderText(header);
+        alert.setContentText(content);
+        alert.showAndWait();
     }
 
     public ObservableList<Track> getTracks() {
@@ -605,6 +768,10 @@ public class MainController {
 
         backButton.setVisible(false);
         backButton.setManaged(false);
+
+        addTrackToPlaylistButton.setVisible(false);
+        addTrackToPlaylistButton.setManaged(false);
+
     }
 
     private void showPlaylistDetails(Playlist playlist) {
@@ -631,6 +798,10 @@ public class MainController {
 
         backButton.setVisible(true);
         backButton.setManaged(true);
+
+        addTrackToPlaylistButton.setVisible(true);
+        addTrackToPlaylistButton.setManaged(true);
+
     }
 
     @FXML
@@ -639,33 +810,6 @@ public class MainController {
     }
 
     /*
-    public void handleAddTrackToPlaylist(Track t, Playlist p) {
-
-        // TO DO:
-        // Creare comando AddTrackCommand
-
-        // TO DO:
-        // Eseguire il comando tramite CommandManager
-
-        // TO DO:
-        // Salvare modifiche nel repository
-
-        // TO DO:
-        // Aggiornare la GUI
-    }
-
-    public void handleRemoveTrackFromPlaylist(Track t, Playlist p) {
-
-        // TO DO:
-        // Creare comando RemoveTrackCommand
-
-        // TO DO:
-        // Eseguire il comando tramite CommandManager
-
-        // TO DO:
-        // Aggiornare persistenza e GUI
-    }
-
     public void handleUpdatePlaylistName(Playlist p, String newName) {
 
         // TO DO:
@@ -682,15 +826,4 @@ public class MainController {
     }
     */
 
-    // public void handleUndo() {
-
-        // TO DO:
-        // Recuperare ultimo comando eseguito
-
-        // TO DO:
-        // Eseguire operazione di undo
-
-        // TO DO:
-        // Aggiornare GUI e stato applicazione
-    // }
 }
