@@ -33,7 +33,6 @@ public class PausedState implements PlayerState {
      */
     @Override
     public void skip(PlaybackEngine engine) {
-
-        
+        engine.nextTrack();
     }
 }

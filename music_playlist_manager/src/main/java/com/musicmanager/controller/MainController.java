@@ -603,14 +603,12 @@ public class MainController {
         playbackEngine.pause();
     }
 
+    /**
+     * Passa alla riproduzione del brano successivo.
+     */
     public void handleSkip() {
 
-        // TO DO:
-        // Passare alla traccia successiva
-        // in base alla PlaybackStrategy attiva
-
-        // TO DO:
-        // Aggiornare informazioni nella GUI
+        playbackEngine.skip();
     }
 
     /**
