@@ -29,7 +29,6 @@ public class PlayingState implements PlayerState {
      */
     @Override
     public void skip(PlaybackEngine engine) {
-
-       
+        engine.nextTrack();
     }
 }

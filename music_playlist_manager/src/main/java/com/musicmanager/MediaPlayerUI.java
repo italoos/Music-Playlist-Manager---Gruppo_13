@@ -22,6 +22,7 @@ public class MediaPlayerUI extends HBox implements PlaybackObserver {
     private Label trackLabel;
     private Label timeLabel;
     private Button playButton;
+    private Button skipButton;
     private Button trackLoopButton;
     private ProgressBar progressBar;
 
@@ -50,6 +51,7 @@ public class MediaPlayerUI extends HBox implements PlaybackObserver {
         trackLabel = new Label("Nessuna traccia selezionata");
         timeLabel = new Label("00:00 / 00:00");
         playButton = new Button("▶"); // Unicode per simbolo play
+        skipButton = new Button("▶|");
         trackLoopButton = new Button("🔁¹"); // Unicode per simbolo loop
         progressBar = new ProgressBar(0);
 
@@ -68,6 +70,7 @@ public class MediaPlayerUI extends HBox implements PlaybackObserver {
      */
     private void initActions() {
         playButton.setOnAction(e -> handlePlaybackAction());
+        skipButton.setOnAction(e -> handleSkipAction());
         trackLoopButton.setOnAction(e -> handleTrackLoopAction());
     }
 
@@ -80,6 +83,17 @@ public class MediaPlayerUI extends HBox implements PlaybackObserver {
         }
 
         controller.handleTogglePlayback();
+    }
+
+    /**
+     * Gestisce lo skip della traccia corrente.
+     */
+    private void handleSkipAction() {
+        if (controller == null) {
+            return;
+        }
+
+        controller.handleSkip();
     }
 
     /**
@@ -107,7 +121,7 @@ public class MediaPlayerUI extends HBox implements PlaybackObserver {
         HBox.setHgrow(trackLabel, Priority.ALWAYS);
         HBox.setHgrow(progressBar, Priority.ALWAYS);
 
-        getChildren().addAll(playButton, trackLabel, trackLoopButton, progressBar, timeLabel);
+        getChildren().addAll(playButton, skipButton, trackLabel, trackLoopButton, progressBar, timeLabel);
     }
 
     /**
