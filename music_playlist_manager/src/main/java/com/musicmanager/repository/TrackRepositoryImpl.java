@@ -19,6 +19,7 @@ public class TrackRepositoryImpl implements TrackRepository {
 
     /**
      * Recupera tutti i brani musicali presenti nella tabella "Tracks".
+     * @return Una lista di oggetti Track rappresentanti tutti i brani musicali presenti nella tabella "Tracks". Se si verifica un errore durante la lettura, viene restituita una lista vuota.
      */
 
     @Override
@@ -57,6 +58,7 @@ public class TrackRepositoryImpl implements TrackRepository {
      * Inserisce un brano musicale nella tabella "Tracks".
      * Supporta sia l'autogenerazione dell'ID sia il reinserimento di un ID specifico,
      * necessario per l'operazione di Undo.
+     * @param track Il brano musicale da inserire nella tabella "Tracks". Se l'ID è maggiore di 0, viene utilizzato come ID esplicito; altrimenti, viene autogenerato.
      */
 
     @Override
@@ -107,6 +109,7 @@ public class TrackRepositoryImpl implements TrackRepository {
 
     /**
      * Aggiorna un brano musicale identificato tramite ID.
+     * @param track Il brano musicale da aggiornare.
      */
 
     @Override
@@ -134,6 +137,7 @@ public class TrackRepositoryImpl implements TrackRepository {
 
     /**
      * Elimina un brano musicale identificato tramite ID.
+     * @param id L'ID del brano musicale da eliminare dalla tabella "Tracks".
      */
 
     @Override

@@ -43,6 +43,7 @@
                         <Color red="0.624" green="0.624" blue="0.624" fx:id="x2" />
                      </textFill>
                   </Label>
+                  <Button fx:id="playAllTracksButton" layoutX="170.0" layoutY="10.0" mnemonicParsing="false" onAction="#handlePlayAllTracks" prefHeight="28.0" prefWidth="40.0" text="▶" />
                   <ListView fx:id="tracksListView" layoutX="14.0" layoutY="52.0" prefHeight="480.0" prefWidth="195.0" AnchorPane.bottomAnchor="14.0" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.0" AnchorPane.topAnchor="52.0" />
                </children>
             </AnchorPane>
@@ -51,7 +52,6 @@
                   <AnchorPane id="Content" minHeight="-1.0" minWidth="-1.0" prefHeight="545.0" prefWidth="430.0">
                      <children>
                         <Label alignment="CENTER" font="$x1" layoutX="14.0" layoutY="14.0" style="&#10;" text="View" textAlignment="CENTER" textFill="$x2" wrapText="false" />
-                        <Text layoutX="189.0" layoutY="277.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Demo OK" />
                      </children>
                   </AnchorPane>
                </content>

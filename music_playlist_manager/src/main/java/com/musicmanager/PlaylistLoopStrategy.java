@@ -5,6 +5,12 @@ import com.musicmanager.model.Track;
 
 public class PlaylistLoopStrategy implements PlaybackStrategy {
 
+    /**
+     * Restituisce il brano successivo nella lista dei brani. Se il brano corrente è l'ultimo della lista, restituisce il primo brano.
+     * @param tracks La lista dei brani da cui ottenere il brano successivo.
+     * @param currentIndex L'indice del brano corrente nella lista dei brani.
+     * @return Il brano successivo nella lista dei brani, o il primo brano se il brano corrente è l'ultimo della lista.
+     */
     @Override
     public Track getNext(List<Track> tracks, int currentIndex) {
 

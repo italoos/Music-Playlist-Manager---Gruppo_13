@@ -6,6 +6,7 @@ import java.util.Optional;
 
 import com.musicmanager.MediaPlayerUI;
 import com.musicmanager.PlaybackEngine;
+import com.musicmanager.PlaybackStrategy;
 import com.musicmanager.model.Playlist;
 import com.musicmanager.model.Track;
 import com.musicmanager.repository.PlaylistRepository;
@@ -80,6 +81,9 @@ public class MainController {
         App.setRoot("primary");
     }
 
+    /**
+     * Inizializza il controller, impostando i listener e caricando i dati.
+     */
     @FXML
     private void initialize() {
         tracksListView.setPlaceholder(new Label("I tuoi brani musicali saranno visualizzati qui"));
@@ -96,6 +100,9 @@ public class MainController {
         loadTracksFromDatabase();
     }
 
+    /**
+     * Classe per la gestione delle celle della lista delle tracce.
+     */
     private class TrackListCell extends ListCell<Track> {
 
         private final Label trackLabel = new Label();
@@ -119,6 +126,11 @@ public class MainController {
             deleteButton.setOnAction(event -> confirmAndDeleteTrack(getItem()));
         }
 
+        /**
+         * Aggiorna l'elemento della lista con le informazioni della traccia.
+         * @param track La traccia da visualizzare.
+         * @param empty Indica se l'elemento è vuoto.
+         */
         @Override
         protected void updateItem(Track track, boolean empty) {
             super.updateItem(track, empty);
@@ -134,6 +146,10 @@ public class MainController {
             setGraphic(content);
         }
 
+        /**
+         * Mostra un dialog di conferma prima di eliminare una traccia. Se l'utente conferma, chiama il metodo handleDeleteTrack per eseguire l'eliminazione.
+         * @param track
+         */
         private void confirmAndDeleteTrack(Track track) {
             if (track == null) {
                 return;
@@ -150,6 +166,11 @@ public class MainController {
             }
         }
 
+
+        /**
+         * Mostra un dialog per l'editing di una traccia.
+         * @param track La traccia da modificare.
+         */
         private void showEditTrackDialog(Track track) {
             if (track == null) {
                 return;
@@ -202,6 +223,9 @@ public class MainController {
             updatedTrack.ifPresent(value -> handleUpdateTrack(track, value));
         }
 
+        /**
+         * Mostra un alert di errore quando i dati della traccia da modificare non sono validi.
+         */
         private void showInvalidTrackEditAlert() {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Errore");
@@ -255,7 +279,6 @@ public class MainController {
     /**
      * Recupera tutti i brani dal database e li rende disponibili alla GUI.
      */
-
     public void loadTracksFromDatabase() {
         tracks.setAll(trackRepository.findAll());
         System.out.println("[MAIN CONTROLLER] INFO: Tracks loaded from database (" + tracks.size() + ").");
@@ -281,42 +304,55 @@ public class MainController {
     }
 
 
-    /** Gestisce la creazione di un nuovo brano musicale a partire da un file. */
-
+    /**
+     * Crea una nuova traccia a partire da un file selezionato. Il file deve essere in un formato specifico che viene interpretato da TrackFileParser. Se la traccia ha gli stessi campi di una traccia già presente, mostra un alert di avviso e impedisce la creazione della traccia duplicata.
+     * @param file Il file da cui creare la traccia. Deve essere in un formato specifico che viene interpretato da TrackFileParser.
+     */
     public void handleCreateTrack(File file) {
 
-    try {
+        try {
 
-        TrackFileParser parser = new TrackFileParser();
+            TrackFileParser parser = new TrackFileParser();
 
-        Track track = parser.parse(file);
+            Track track = parser.parse(file);
 
-        if (isDuplicateTrack(track)) {
-            showDuplicateTrackAlert(track);
-            return;
+            if (isDuplicateTrack(track)) {
+                showDuplicateTrackAlert(track);
+                return;
+            }
+
+            trackRepository.save(track);
+            tracks.add(track);
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Errore");
+            alert.setHeaderText("File non valido");
+            alert.setContentText("Il file selezionato non è valido o non può essere letto. Assicurati che il file abbia il formato corretto.");
+            alert.showAndWait();
         }
 
-        trackRepository.save(track);
-        tracks.add(track);
-
-    } catch (Exception e) {
-
-        e.printStackTrace();
-
-        Alert alert = new Alert(Alert.AlertType.ERROR);
-        alert.setTitle("Errore");
-        alert.setHeaderText("File non valido");
-        alert.setContentText("Il file selezionato non è valido o non può essere letto. Assicurati che il file abbia il formato corretto.");
-        alert.showAndWait();
+        
     }
 
-    
-}
-
+    /**
+     * Controlla se esiste già una traccia con gli stessi campi di quella da creare. Se sì, mostra un alert di avviso e impedisce la creazione della traccia duplicata.
+     * @param newTrack La traccia da verificare.
+     * @return true se esiste già una traccia con gli stessi campi, false altrimenti.
+     */
     private boolean isDuplicateTrack(Track newTrack) {
         return tracks.stream().anyMatch(existingTrack -> hasSameFields(existingTrack, newTrack));
     }
 
+    /**
+     * Controlla se due tracce hanno gli stessi campi (titolo, autore, durata, genere, anno). Utilizzato per identificare tracce duplicate.
+     * @param firstTrack La prima traccia da confrontare.
+     * @param secondTrack La seconda traccia da confrontare.
+     * @return true se le tracce hanno gli stessi campi, false altrimenti.
+     */
     private boolean hasSameFields(Track firstTrack, Track secondTrack) {
         return sameText(firstTrack.getTitle(), secondTrack.getTitle())
                 && sameText(firstTrack.getAuthor(), secondTrack.getAuthor())
@@ -325,6 +361,12 @@ public class MainController {
                 && firstTrack.getYear() == secondTrack.getYear();
     }
 
+    /**
+     * Controlla se due stringhe sono uguali ignorando spazi bianchi e differenze tra maiuscole e minuscole. Utilizzato per confrontare i campi testuali delle tracce.
+     * @param firstText La prima stringa da confrontare.
+     * @param secondText La seconda stringa da confrontare.
+     * @return true se le stringhe sono uguali ignorando spazi bianchi e differenze tra maiuscole e minuscole, false altrimenti.
+     */
     private boolean sameText(String firstText, String secondText) {
         if (firstText == null || secondText == null) {
             return firstText == secondText;
@@ -333,6 +375,10 @@ public class MainController {
         return firstText.trim().equalsIgnoreCase(secondText.trim());
     }
 
+    /**
+     * Mostra un alert di avviso quando si tenta di creare una traccia che ha gli stessi campi di una traccia già presente nella lista. Informa l'utente che la traccia è duplicata e non può essere aggiunta.
+     * @param track La traccia che si è tentato di creare ma è risultata duplicata. Viene utilizzata per mostrare le informazioni della traccia nell'alert.
+     */
     private void showDuplicateTrackAlert(Track track) {
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle("Traccia duplicata");
@@ -341,8 +387,11 @@ public class MainController {
         alert.showAndWait();
     }
 
-    /** Gestisce la modifica di un brano musicale. */
-
+    /**
+     * Gestisce l'aggiornamento di una traccia musicale. Riceve la traccia da aggiornare e la traccia con i nuovi dati. Aggiorna i campi della traccia originale con quelli della traccia aggiornata, salva le modifiche nel repository e aggiorna la lista dei brani per riflettere le modifiche nella GUI.
+     * @param track La traccia da aggiornare. Deve essere una traccia già presente nella lista e nel repository.
+     * @param updatedTrack La traccia con i nuovi dati. I campi di questa traccia verranno copiati nella traccia originale. Non deve essere presente nella lista o nel repository, altrimenti si rischia di creare una traccia duplicata.
+     */
     @FXML
     public void handleUpdateTrack(Track track, Track updatedTrack) {
 
@@ -377,8 +426,10 @@ public class MainController {
 
     }
 
-    /** Gestisce la rimozione di un brano musicale. */
-
+    /**
+     * Gestisce la rimozione di una traccia musicale. Riceve la traccia da rimuovere, elimina la traccia dal repository e dalla lista dei brani per riflettere le modifiche nella GUI. Prima di eseguire l'eliminazione, mostra un dialog di conferma per evitare eliminazioni accidentali.
+     * @param track La traccia da rimuovere. Deve essere una traccia già presente nella lista e nel repository.
+     */
     @FXML
     public void handleDeleteTrack(Track track) {
 
@@ -479,7 +530,6 @@ public class MainController {
     }
 
     /** Ripristina lo stato precedente annullando l'ultima operazione. */
-
     @FXML
     public void handleUndo() {
         commandManager.undoLastCommand();
@@ -508,16 +558,28 @@ public class MainController {
         alert.showAndWait();
     }
 
+    /**
+     * Utilizzata principalmente per consentire ad altre classi, come MediaPlayerUI, di accedere alla lista dei brani e visualizzarli nella GUI.
+     * @return La lista dei brani musicali attualmente presenti. Ogni elemento della lista è un oggetto Track che rappresenta un brano musicale con i suoi campi (titolo, autore, durata, genere, anno). La lista è osservabile, quindi eventuali modifiche alla lista (aggiunta, rimozione, aggiornamento di tracce) saranno automaticamente riflesse nella GUI.
+     */
     public ObservableList<Track> getTracks() {
         return tracks;
     }
 
+    /**
+     * Gestisce la riproduzione di una traccia musicale. Riceve la traccia da riprodurre e la passa al motore di riproduzione.
+     * @param track La traccia da riprodurre. Deve essere una traccia già presente nella lista e nel repository.
+     */
     @FXML
     public void handlePlay() {
         Track selectedTrack = tracksListView == null ? null : tracksListView.getSelectionModel().getSelectedItem();
         playTrack(selectedTrack);
     }
 
+    /**
+     * Riproduce una traccia musicale specifica. Se la traccia è null, mostra un messaggio di avviso e non esegue alcuna operazione. Altrimenti, seleziona la traccia nella lista dei brani, imposta la traccia corrente nel motore di riproduzione e avvia la riproduzione.
+     * @param track La traccia da riprodurre. Deve essere una traccia già presente nella lista e nel repository. Se è null, non viene eseguita alcuna operazione e viene mostrato un messaggio di avviso.
+     */
     private void playTrack(Track track) {
 
         if (track == null) {
@@ -526,11 +588,15 @@ public class MainController {
         }
 
         tracksListView.getSelectionModel().select(track);
+        playbackEngine.setCurrentPlaylist(createPlaylistFromTracks());
         playbackEngine.setCurrentTrack(track);
         playbackEngine.play();
         System.out.println("[MAIN CONTROLLER] INFO: Play requested for track: " + track.getTitle() + ".");
     }
 
+    /**
+     * Gestisce la pausa della riproduzione. Mette in pausa la traccia corrente.
+     */
     public void handlePause() {
         playbackEngine.pause();
     }
@@ -545,6 +611,9 @@ public class MainController {
         // Aggiornare informazioni nella GUI
     }
 
+    /**
+     * Alterna tra la pausa e la riproduzione della traccia corrente.
+     */
     public void handleTogglePlayback() {
         if (playbackEngine.isPlaying()) {
             handlePause();
@@ -561,15 +630,27 @@ public class MainController {
         handlePlay();
     }
 
-    public void handleSetStrategy() {
-        // TO DO: Implementare strategia di riproduzione
-        // playbackEngine.setStrategy(<nuova strategia>);
+    /**
+     * Imposta la strategia di riproduzione. Riceve una strategia di riproduzione e la passa al motore di riproduzione per modificare il comportamento di riproduzione. Ad esempio, se si riceve una TrackLoopStrategy, il motore di riproduzione dovrebbe essere configurato per ripetere la traccia corrente indefinitamente finché non viene cambiata la traccia o la strategia.
+     * @param strategy La strategia di riproduzione da impostare. Deve essere una strategia valida che implementa l'interfaccia PlaybackStrategy. Se è null, non viene eseguita alcuna operazione e viene mostrato un messaggio di avviso.
+     */
+    public void handleSetStrategy(PlaybackStrategy strategy) {
+        playbackEngine.setStrategy(strategy);
     }
+
+    /**
+     * Utilizzata principalmente per consentire ad altre classi, come MediaPlayerUI, di accedere alla lista delle playlist e visualizzarle nella GUI.
+     * @return La lista delle playlist attualmente presenti. Ogni elemento della lista è un oggetto Playlist che rappresenta una playlist con i suoi campi (nome, lista di tracce). La lista è osservabile, quindi eventuali modifiche alla lista (aggiunta, rimozione, aggiornamento di playlist) saranno automaticamente riflesse nella GUI.
+     */
     public ObservableList<Playlist> getPlaylists() {
         return playlists;
     }
     
-    //metodo per la validazione del nome della Playlist
+    /**
+     * Controlla se esiste già una playlist con lo stesso nome di quella da creare. Se sì, mostra un alert di avviso e impedisce la creazione della playlist duplicata.
+     * @param name Il nome della playlist da verificare. Deve essere una stringa non nulla e non vuota. Viene confrontato con i nomi delle playlist già presenti nella lista, ignorando spazi bianchi e differenze tra maiuscole e minuscole.
+     * @return true se esiste già una playlist con lo stesso nome, false altrimenti.
+     */
     private boolean isValidPlaylistName(String name) {
 
         if (name == null || name.trim().isEmpty()) {
@@ -580,7 +661,9 @@ public class MainController {
     }
 
 
-    //metodo per la creazione di una Playlist da form 
+    /**
+     * Gestisce la creazione di una nuova playlist.
+     */
     @FXML
     public void handleCreatePlaylist() {
 
@@ -618,7 +701,9 @@ public class MainController {
         playlists.setAll(playlistRepository.findAll());
     }
 
-    //metodo per la visualizzazione della sezione sulla playlist
+    /**
+     * Inizializza la sezione delle playlist.
+     */
     private void initializePlaylistSection() {
 
         playlists.setAll(playlistRepository.findAll());
@@ -666,7 +751,7 @@ public class MainController {
                 deleteButton.setOnAction(e -> {
                     Playlist p = getItem();
                     if (p != null) {
-                        handleDeletePlaylist(p);
+                        confirmAndDeletePlaylist(p);
                     }
                 });
             }
@@ -698,14 +783,81 @@ public class MainController {
         });
     }
 
-    private void handleDeletePlaylist(Playlist playlist) {
-
+    /**
+     * Gestisce l riproduzione della sezione "Tutti i brani".
+     */
+    @FXML
+    public void handlePlayAllTracks() {
+        Playlist playlist = createPlaylistFromTracks();
+        handlePlayPlaylist(playlist);
     }
 
+    /**
+     * Genera una playlist per la compatibilità con il playback engine nell'inizializzazione della coda di riproduzione.
+     * @return Plylist contenente tutte le tracce musicali.
+     */
+    private Playlist createPlaylistFromTracks() {
+        Playlist playlist = new Playlist("Tutti i brani");
+        playlist.getTracks().addAll(tracks);
+        return playlist;
+    }
+
+    /**
+     * Gestisce il click del tasto play associato alle playlist avviando la riproduzione delle traccie contenute nella playlist coerentemente con la Playback Strategy.
+     * @param playlist La Playlist di cui iniziare la riproduzione.
+     */
     private void handlePlayPlaylist(Playlist playlist) {
+        if (playlist == null || playlist.getTracks().isEmpty()) {
+            System.out.println("[MAIN CONTROLLER] WARNING: No playlist selected or playlist is empty.");
+            return;
+        }
 
+        selectedPlaylist = playlist;
+        playbackEngine.setCurrentPlaylist(selectedPlaylist);
+        playbackEngine.setCurrentTrack(selectedPlaylist.getTracks().get(0));
+        playbackEngine.play();
+
+        System.out.println("[MAIN CONTROLLER] INFO: Play requested for playlist: " + playlist.getName() + ".");
     }
 
+    /**
+     * Mostra un dialog di conferma prima di eliminare una playlist. Se l'utente conferma, chiama il metodo handleRemovePlaylist per eseguire l'eliminazione.
+     * @param playlist La playlist da eliminare. Deve essere una playlist già presente nella lista e nel repository. Se è null, non viene eseguita alcuna operazione e viene mostrato un messaggio di avviso.
+     */
+    private void confirmAndDeletePlaylist(Playlist playlist) {
+        if (playlist == null) {
+            return;
+        }
+
+        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmAlert.setTitle("Conferma eliminazione");
+        confirmAlert.setHeaderText("Eliminare la playlist?");
+        confirmAlert.setContentText("Sei sicuro di voler eliminare la playlist \"" + playlist.getName() + "\"?\nQuesta azione rimuoverà la playlist dal sistema.");
+
+        java.util.Optional<ButtonType> result = confirmAlert.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            handleDeletePlaylist(playlist);
+        }
+    }
+
+    /**
+     * Gestisce la rimozione di una playlist selezionata.
+     */
+    @FXML
+    public void handleDeletePlaylist(Playlist playlist) {
+        Playlist target = playlist != null ? playlist : playlistListView.getSelectionModel().getSelectedItem();
+
+        if (target != null) {
+            playlistRepository.delete(target.getId());
+            playlistListView.getItems().remove(target);
+            playlistListView.refresh();
+        }
+    }
+
+    /**
+     * Mostra un dialog per modificare il nome di una playlist. Riceve la playlist da modificare, mostra un dialog con un campo di testo precompilato con il nome attuale della playlist e consente all'utente di inserire un nuovo nome. Se l'utente conferma, valida il nuovo nome (non vuoto, non duplicato) e aggiorna la playlist con il nuovo nome, salvando le modifiche nel repository e aggiornando la GUI. Se il nuovo nome non è valido, mostra un alert di errore.
+     * @param playlist La playlist da modificare. Deve essere una playlist già presente nella lista e nel repository. Viene utilizzata per precompilare il campo di testo del dialog con il nome attuale della playlist e per aggiornare il nome della playlist se l'utente conferma la modifica.
+     */
     private void showEditPlaylistDialog(Playlist playlist) {
 
         TextInputDialog dialog = new TextInputDialog(playlist.getName());
@@ -745,6 +897,10 @@ public class MainController {
         });
     }
 
+    /**
+     * Mostra un alert di errore quando si tenta di modificare il nome di una playlist con un nome non valido (vuoto o duplicato). Informa l'utente che il nome inserito non è valido e deve essere modificato.
+     * @param message Il messaggio da visualizzare nell'alert. Deve essere una stringa che spiega il motivo per cui il nome della playlist non è valido (ad esempio, "Il nome non può essere vuoto" o "Esiste già una playlist con questo nome"). Viene mostrato nel contenuto dell'alert per informare l'utente del problema specifico con il nome inserito.
+     */
     private void showInvalidPlaylistNameAlert(String message) {
 
         Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -754,6 +910,9 @@ public class MainController {
         alert.showAndWait();
     }
 
+    /**
+     * Mostra la vista delle playlist.
+     */
     private void showPlaylistsView() {
 
         selectedPlaylist = null;
@@ -774,6 +933,10 @@ public class MainController {
 
     }
 
+    /**
+     * Mostra i dettagli di una playlist selezionata, inclusa la lista delle tracce presenti nella playlist. Aggiorna la GUI per visualizzare le informazioni della playlist e nascondere la lista delle playlist.
+     * @param playlist La playlist di cui mostrare i dettagli. Deve essere una playlist già presente nella lista delle playlist. Viene utilizzata per aggiornare la GUI con le informazioni della playlist e la lista delle tracce contenute nella playlist.
+     */
     private void showPlaylistDetails(Playlist playlist) {
 
         Playlist fullPlaylist = playlistRepository.findById(playlist.getId());
@@ -804,6 +967,9 @@ public class MainController {
 
     }
 
+    /**
+     * Gestisce il clic sul pulsante per tornare alla visualizzazione delle playlist.
+     */
     @FXML
     private void handleBackToPlaylists() {
         showPlaylistsView();
