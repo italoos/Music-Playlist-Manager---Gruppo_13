@@ -95,4 +95,30 @@ class PlaybackEngineTest {
         assertNull(engine.getCurrentTrack());
         assertFalse(engine.isPlaying());
     }
+
+    @Test
+    void startPlaylistUsesStrategyToChooseTheFirstTrack() {
+        PlaybackEngine engine = PlaybackEngine.getInstance();
+        Track firstTrack = new Track(1, "First", "Artist A", 180, "Rock", 2020);
+        Track strategyFirstTrack = new Track(2, "Strategy first", "Artist B", 210, "Pop", 2021);
+        Playlist playlist = new Playlist("Test playlist");
+        playlist.addTrack(firstTrack);
+        playlist.addTrack(strategyFirstTrack);
+        engine.setStrategy(new PlaybackStrategy() {
+            @Override
+            public Track getFirst(java.util.List<Track> tracks, Track preferredTrack) {
+                return strategyFirstTrack;
+            }
+
+            @Override
+            public Track getNext(java.util.List<Track> tracks, int currentIndex) {
+                return null;
+            }
+        });
+
+        engine.startPlaylist(playlist);
+
+        assertSame(strategyFirstTrack, engine.getCurrentTrack());
+        assertTrue(engine.isPlaying());
+    }
 }

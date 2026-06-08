@@ -165,6 +165,25 @@ public class PlaybackEngine {
     }
 
     /**
+     * Avvia una nuova coda di riproduzione usando la strategia corrente.
+     * Se preferredTrack e' null, la strategia sceglie la prima traccia.
+     */
+    public void startPlaylist(Playlist playlist, Track preferredTrack) {
+        if (playlist == null || playlist.getTracks().isEmpty()) {
+            return;
+        }
+
+        currentPlaylist = playlist;
+        Track firstTrack = strategy.getFirst(playlist.getTracks(), preferredTrack);
+        setCurrentTrack(firstTrack);
+        play();
+    }
+
+    public void startPlaylist(Playlist playlist) {
+        startPlaylist(playlist, null);
+    }
+
+    /**
      * Restituisce la traccia attualmente in riproduzione.
      * @return La traccia attualmente in riproduzione.
      */
