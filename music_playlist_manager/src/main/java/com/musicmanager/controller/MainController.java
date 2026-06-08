@@ -590,9 +590,7 @@ public class MainController {
         }
 
         tracksListView.getSelectionModel().select(track);
-        playbackEngine.setCurrentPlaylist(createPlaylistFromTracks());
-        playbackEngine.setCurrentTrack(track);
-        playbackEngine.play();
+        playbackEngine.startPlaylist(createPlaylistFromTracks(), track);
         System.out.println("[MAIN CONTROLLER] INFO: Play requested for track: " + track.getTitle() + ".");
     }
 
@@ -635,6 +633,7 @@ public class MainController {
      * @param strategy La strategia di riproduzione da impostare. Deve essere una strategia valida che implementa l'interfaccia PlaybackStrategy. Se è null, non viene eseguita alcuna operazione e viene mostrato un messaggio di avviso.
      */
     public void handleSetStrategy(PlaybackStrategy strategy) {
+
         playbackEngine.setStrategy(strategy);
     }
 
@@ -813,9 +812,7 @@ public class MainController {
         }
 
         selectedPlaylist = playlist;
-        playbackEngine.setCurrentPlaylist(selectedPlaylist);
-        playbackEngine.setCurrentTrack(selectedPlaylist.getTracks().get(0));
-        playbackEngine.play();
+        playbackEngine.startPlaylist(selectedPlaylist);
 
         System.out.println("[MAIN CONTROLLER] INFO: Play requested for playlist: " + playlist.getName() + ".");
     }
@@ -859,6 +856,8 @@ public class MainController {
             playlistRepository.delete(target.getId());
             playlistListView.getItems().remove(target);
             playlistListView.refresh();
+            playbackEngine.setCurrentTrack(null);
+            playbackEngine.setCurrentPlaylist(null);
         }
     }
 

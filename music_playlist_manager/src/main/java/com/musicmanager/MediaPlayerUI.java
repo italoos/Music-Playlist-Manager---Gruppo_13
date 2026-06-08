@@ -56,7 +56,7 @@ public class MediaPlayerUI extends HBox implements PlaybackObserver {
         playButton = new Button("▶"); // Unicode per simbolo play
         skipButton = new Button("▶|");
         sequentialButton = new Button("▶▶");
-
+        sequentialButton.setStyle("-fx-background-color: #3498db;"); // Attivo di default
         shuffleButton = new Button("🔀");
         playlistLoopButton = new Button("Playlist🔁");
         trackLoopButton = new Button("🔁¹"); // Unicode per simbolo loop
@@ -199,7 +199,7 @@ public class MediaPlayerUI extends HBox implements PlaybackObserver {
         playButton.setText(isPlaying ? "⏸" : "▶"); // Unicode per simbolo pause e play
 
         if (currentTrack != null) {
-            trackLabel.setText(currentTrack.getTitle() + " - " + currentTrack.getAuthor() + "  (" + currentTrack.getGenre() + ", " + currentTrack.getYear() + ")");
+            trackLabel.setText(currentPlaylist.getName() + "\n" + currentTrack.getTitle() + " - " + currentTrack.getAuthor() + "  (" + currentTrack.getGenre() + ", " + currentTrack.getYear() + ")");
         } else {
             trackLabel.setText("Nessuna traccia selezionata");
         }
