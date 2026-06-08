@@ -23,6 +23,9 @@ public class MediaPlayerUI extends HBox implements PlaybackObserver {
     private Label timeLabel;
     private Button playButton;
     private Button skipButton;
+    private Button sequentialButton;
+    private Button shuffleButton;
+    private Button playlistLoopButton;
     private Button trackLoopButton;
     private ProgressBar progressBar;
 
@@ -52,6 +55,10 @@ public class MediaPlayerUI extends HBox implements PlaybackObserver {
         timeLabel = new Label("00:00 / 00:00");
         playButton = new Button("▶"); // Unicode per simbolo play
         skipButton = new Button("▶|");
+        sequentialButton = new Button("▶▶");
+
+        shuffleButton = new Button("🔀");
+        playlistLoopButton = new Button("Playlist🔁");
         trackLoopButton = new Button("🔁¹"); // Unicode per simbolo loop
         progressBar = new ProgressBar(0);
 
@@ -71,6 +78,9 @@ public class MediaPlayerUI extends HBox implements PlaybackObserver {
     private void initActions() {
         playButton.setOnAction(e -> handlePlaybackAction());
         skipButton.setOnAction(e -> handleSkipAction());
+        sequentialButton.setOnAction(e -> handleSequentialAction());
+        shuffleButton.setOnAction(e -> handleShuffleAction());
+        playlistLoopButton.setOnAction(e -> handlePlaylistLoopAction());
         trackLoopButton.setOnAction(e -> handleTrackLoopAction());
     }
 
@@ -96,6 +106,46 @@ public class MediaPlayerUI extends HBox implements PlaybackObserver {
         controller.handleSkip();
     }
 
+
+    private void handleSequentialAction(){
+        if(controller == null){
+            return;
+        }
+        resetStrategyButtons();
+
+        sequentialButton.setStyle("-fx-background-color: #3498db;");
+
+        controller.handleSetStrategy(new SequentialStrategy());
+    }
+
+     /**
+     * Gestisce la riproduzione casuale della playlist.
+     */
+    private void handleShuffleAction(){
+        if(controller == null){
+            return;
+
+        }
+        resetStrategyButtons();
+
+        shuffleButton.setStyle("-fx-background-color: #3498db;");
+
+        controller.handleSetStrategy(new ShuffleStrategy());
+    }
+
+     /**
+     * Gestisce l'azione di loop della playlist.
+     */
+    private void handlePlaylistLoopAction(){
+        if(controller == null){
+            return;
+        }
+        resetStrategyButtons();
+
+        playlistLoopButton.setStyle("-fx-background-color: #3498db;");
+        controller.handleSetStrategy(new PlaylistLoopStrategy());
+    }
+
     /**
      * Gestisce l'azione di loop della traccia.
      */
@@ -103,9 +153,22 @@ public class MediaPlayerUI extends HBox implements PlaybackObserver {
         if (controller == null) {
             return;
         }
+        resetStrategyButtons();
+
         trackLoopButton.setStyle("-fx-background-color: #3498db;");
          
         controller.handleSetStrategy(new TrackLoopStrategy());
+    }
+
+    /**
+     * Resetta il pulsante della modalità selezionata.
+     */
+    private void resetStrategyButtons() {
+
+        sequentialButton.setStyle("");
+        shuffleButton.setStyle("");
+        playlistLoopButton.setStyle("");
+        trackLoopButton.setStyle("");
     }
 
     /**
@@ -121,7 +184,7 @@ public class MediaPlayerUI extends HBox implements PlaybackObserver {
         HBox.setHgrow(trackLabel, Priority.ALWAYS);
         HBox.setHgrow(progressBar, Priority.ALWAYS);
 
-        getChildren().addAll(playButton, skipButton, trackLabel, trackLoopButton, progressBar, timeLabel);
+        getChildren().addAll(playButton, skipButton, trackLabel, shuffleButton, sequentialButton, playlistLoopButton, trackLoopButton, progressBar, timeLabel);
     }
 
     /**
