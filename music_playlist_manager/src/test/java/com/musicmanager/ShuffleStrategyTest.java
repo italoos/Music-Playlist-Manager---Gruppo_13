@@ -16,6 +16,12 @@ import com.musicmanager.model.Track;
 
 class ShuffleStrategyTest {
 
+    /**
+     * Il seguente test controlla che:
+     * - tutte le tracce vengano riprodotte
+     * - nessuna traccia venga persa
+     * - l'ordine non sia quello originale
+     */
     @Test
     void getFirstCreatesACompleteShuffledQueue() {
         List<Track> tracks = createTracks(1, 4);
@@ -28,6 +34,11 @@ class ShuffleStrategyTest {
         assertFalse(tracks.equals(playbackOrder));
     }
 
+    /**
+     * Il seguente test verifica che una playlist precedente
+     * non influenzi la successiva, aggiungendo ad esempio le 
+     * proprie tracce alla riproduzione della successiva
+     */
     @Test
     void getFirstRebuildsTheQueueForEachPlaylist() {
         List<Track> firstPlaylist = createTracks(1, 4);
@@ -40,6 +51,12 @@ class ShuffleStrategyTest {
         assertEquals(new HashSet<>(secondPlaylist), new HashSet<>(secondPlaybackOrder));
     }
 
+    /**
+     * Il seguente test verifica che la traccia preferita venga
+     * riprodotta come prima traccia della playlist senza alterare
+     * la correttezza della coda shuffle, che deve continuare a
+     * contenere tutte le tracce della playlist.
+     */
     @Test
     void preferredTrackIsPlayedFirstWithoutLeavingTheShuffledQueue() {
         List<Track> tracks = createTracks(1, 4);
@@ -53,12 +70,28 @@ class ShuffleStrategyTest {
         assertEquals(new HashSet<>(tracks), new HashSet<>(playbackOrder));
     }
 
+    /**
+     * Il seguente test controlla che al termine dell'ultima traccia 
+     * nella coda di riproduzione, la riproduzione si interrompe
+     */
+    @Test
+    void returnsNullAfterLastTrackOfShuffledQueue() {
+    List<Track> tracks = createTracks(1, 3);
+    ShuffleStrategy strategy = new ShuffleStrategy(new Random(1));
+
+    List<Track> order = collectPlaybackOrder(strategy, tracks);
+
+    Track lastTrack = order.get(order.size() - 1);
+    Track next = strategy.getNext(tracks, tracks.indexOf(lastTrack));
+
+    assertEquals(null, next);
+}
+
     private List<Track> collectPlaybackOrder(ShuffleStrategy strategy, List<Track> tracks) {
         return collectPlaybackOrder(strategy, tracks, strategy.getFirst(tracks, null));
     }
 
-    private List<Track> collectPlaybackOrder(
-            ShuffleStrategy strategy, List<Track> tracks, Track firstTrack) {
+    private List<Track> collectPlaybackOrder(ShuffleStrategy strategy, List<Track> tracks, Track firstTrack) {
         List<Track> playbackOrder = new ArrayList<>();
         Track currentTrack = firstTrack;
 

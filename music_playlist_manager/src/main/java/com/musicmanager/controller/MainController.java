@@ -695,8 +695,6 @@ public class MainController {
         Playlist playlist = new Playlist(playlistName);
 
         playlistRepository.save(playlist);
-
-        playlistRepository.save(playlist);
         playlists.setAll(playlistRepository.findAll());
     }
 
