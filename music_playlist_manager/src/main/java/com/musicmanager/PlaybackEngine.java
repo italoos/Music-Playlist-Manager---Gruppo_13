@@ -167,6 +167,8 @@ public class PlaybackEngine {
     /**
      * Avvia una nuova coda di riproduzione usando la strategia corrente.
      * Se preferredTrack e' null, la strategia sceglie la prima traccia.
+     * @param playlist La playlist da cui iniziare la riproduzione.
+     * @param preferredTrack La traccia preferita da riprodurre per prima, se presente nella playlist. Se null, la strategia sceglie la prima traccia.
      */
     public void startPlaylist(Playlist playlist, Track preferredTrack) {
         if (playlist == null || playlist.getTracks().isEmpty()) {
