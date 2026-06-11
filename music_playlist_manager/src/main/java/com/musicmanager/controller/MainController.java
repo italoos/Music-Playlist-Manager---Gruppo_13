@@ -896,7 +896,7 @@ public class MainController {
             String oldName = playlist.getName();
             playlist.setName(trimmedName);
 
-            playlistRepository.update(playlist);
+            playlistRepository.updateName(playlist);
 
             playlistListView.refresh();
         });

@@ -92,7 +92,7 @@ public class PlaylistRepositoryImpl implements PlaylistRepository {
 
     //Aggiorna il nome della Playlist selezionata
     @Override
-    public void update(Playlist playlist) {
+    public void updateName(Playlist playlist) {
 
         // Cambiamo SOLO il nome nella tabella principale
         String updatePlaylist = "UPDATE Playlists SET name = ? WHERE id = ?;";
@@ -111,6 +111,72 @@ public class PlaylistRepositoryImpl implements PlaylistRepository {
 
         } catch (SQLException e) {
             System.err.println("[DB ERROR] update failed: " + e.getMessage());
+        }
+    }
+
+     @Override
+    public void update(Playlist playlist) {
+
+        String updatePlaylist =
+                "UPDATE Playlists SET name = ? WHERE id = ?;";
+
+        String deleteRelations =
+                "DELETE FROM Playlist_Tracks WHERE playlist_id = ?;";
+
+        String insertRelation =
+                "INSERT INTO Playlist_Tracks (playlist_id, track_id) VALUES (?, ?);";
+
+        Connection conn = null;
+
+        try {
+            conn = DatabaseManager.getInstance().getConnection();
+            conn.setAutoCommit(false);
+
+            int playlistId = playlist.getId();
+
+            try (PreparedStatement ps = conn.prepareStatement(updatePlaylist)) {
+                ps.setString(1, playlist.getName());
+                ps.setInt(2, playlistId);
+
+                int affected = ps.executeUpdate();
+                if (affected == 0) {
+                    conn.rollback();
+                    return;
+                }
+            }
+
+            try (PreparedStatement ps = conn.prepareStatement(deleteRelations)) {
+                ps.setInt(1, playlistId);
+                ps.executeUpdate();
+            }
+
+            if (playlist.getTracks() != null && !playlist.getTracks().isEmpty()) {
+
+                try (PreparedStatement ps = conn.prepareStatement(insertRelation)) {
+
+                    for (Track t : playlist.getTracks()) {
+                        ps.setInt(1, playlistId);
+                        ps.setInt(2, t.getId());
+                        ps.addBatch();
+                    }
+
+                    ps.executeBatch();
+                }
+            }
+
+            conn.commit();
+
+        } catch (SQLException e) {
+
+            System.err.println("[DB ERROR] update failed: " + e.getMessage());
+
+            if (conn != null) {
+                try {
+                    conn.rollback();
+                } catch (SQLException ex) {
+                    System.err.println("[DB ERROR] rollback failed: " + ex.getMessage());
+                }
+            }
         }
     }
 
