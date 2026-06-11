@@ -2,6 +2,7 @@ module com.musicmanager {
 
     requires javafx.controls;
     requires javafx.fxml;
+    requires transitive javafx.base;
     requires transitive java.sql;
 
     opens com.musicmanager.controller to javafx.fxml;

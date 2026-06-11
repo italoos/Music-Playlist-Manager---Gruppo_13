@@ -51,6 +51,8 @@ public class MainController {
     @FXML
     private Label detailsTitleLabel;
     @FXML
+    private Button undoButton;
+    @FXML
     private Button backButton;
     @FXML
     private Button addTrackToPlaylistButton;
@@ -88,6 +90,7 @@ public class MainController {
      */
     @FXML
     private void initialize() {
+        undoButton.disableProperty().bind(commandManager.canUndoProperty().not());
         tracksListView.setPlaceholder(new Label("I tuoi brani musicali saranno visualizzati qui"));
         tracksListView.setItems(tracks);
         tracksListView.setCellFactory(listView -> new TrackListCell());
@@ -95,9 +98,6 @@ public class MainController {
         mediaPlayerUI.setController(this);
         playbackEngine.registerObserver(mediaPlayerUI);
         playbackEngine.notifyObservers();
-        /*Track track = new Track(0, "Short", "Antonio", 10, "Metal", 2010);
-        trackRepository.save(track);
-        tracks.add(track);*/
         initializePlaylistSection();
         loadTracksFromDatabase();
     }
@@ -323,8 +323,8 @@ public class MainController {
                 return;
             }
 
-            trackRepository.save(track);
-            tracks.add(track);
+            Command command = new AddTrackCommand(track, trackRepository, tracks);
+            commandManager.executeCommand(command);
 
         } catch (Exception e) {
 
@@ -532,6 +532,7 @@ public class MainController {
     }
 
     /** Ripristina lo stato precedente annullando l'ultima operazione. */
+
     @FXML
     public void handleUndo() {
         commandManager.undoLastCommand();

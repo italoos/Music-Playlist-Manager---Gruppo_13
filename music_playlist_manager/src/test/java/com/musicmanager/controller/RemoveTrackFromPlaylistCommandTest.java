@@ -148,4 +148,26 @@ class RemoveTrackFromPlaylistCommandTest {
 
     }
 
+    /** Verifica che l'undo del comando ripristini la traccia alla posizione originale nella playlist. */
+
+    @Test
+    void undoRestoresTrackToItsExactOriginalIndexInPlaylist() {
+
+        Track trackPrima = new Track(10, "Traccia Prima", "Autore A", 180, "Pop", 2020);
+        Track trackDopo = new Track(12, "Traccia Dopo", "Autore B", 200, "Pop", 2021);
+
+        playlist.getTracks().add(0, trackPrima);
+        playlist.getTracks().add(trackDopo);
+
+        RemoveTrackFromPlaylistCommand command = new RemoveTrackFromPlaylistCommand(playlist, track, repository);
+        command.execute();
+
+        assertFalse(playlist.getTracks().contains(track));
+
+        command.undo();
+
+        assertEquals(1, playlist.getTracks().indexOf(track), "La traccia deve essere ripristinata esattamente alla sua posizione originale all'interno della playlist.");
+
+    }
+
 }

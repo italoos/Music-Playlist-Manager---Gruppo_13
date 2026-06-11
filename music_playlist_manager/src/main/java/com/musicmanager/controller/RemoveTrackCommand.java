@@ -26,6 +26,8 @@ public class RemoveTrackCommand implements Command {
 
     private final List<Playlist> affectedPlaylists = new ArrayList<>();
 
+    private final List<Integer> affectedPlaylistIndices = new ArrayList<>();
+
     public RemoveTrackCommand(Track track, TrackRepository trackRepository, PlaylistRepository playlistRepository, ObservableList<Track> tracks) {
         this.track = track;
         this.trackRepository = trackRepository;
@@ -39,8 +41,9 @@ public class RemoveTrackCommand implements Command {
     @Override
     public void execute() {
 
-        this.index = tracks.indexOf(track);
+        index = tracks.indexOf(track);
         affectedPlaylists.clear();
+        affectedPlaylistIndices.clear();
 
         PlaybackEngine engine = PlaybackEngine.getInstance();
 
@@ -51,10 +54,11 @@ public class RemoveTrackCommand implements Command {
         List<Playlist> playlists = playlistRepository.findAll();
 
         for (Playlist p : playlists) {
-            boolean containsTrack = p.getTracks().contains(track);
-            if (containsTrack) {
-                p.removeTrack(track);
+            int trackIndex = p.getTracks().indexOf(track);
+            if (trackIndex != -1) {
                 affectedPlaylists.add(p);
+                affectedPlaylistIndices.add(trackIndex);
+                p.removeTrack(track);
             }
         }
 
@@ -82,12 +86,26 @@ public class RemoveTrackCommand implements Command {
             tracks.add(track);
         }
 
-        for (Playlist p : affectedPlaylists) {
-            p.addTrack(track);
+        PlaybackEngine engine = PlaybackEngine.getInstance();
+
+        for (int i = 0; i < affectedPlaylists.size(); i++) {
+
+            Playlist p = affectedPlaylists.get(i);
+            int playlistTrackIndex = affectedPlaylistIndices.get(i);
+
+            if (playlistTrackIndex >= 0 && playlistTrackIndex <= p.getTracks().size()) {
+                p.getTracks().add(playlistTrackIndex, track);
+            } else {
+                p.addTrack(track);
+            }
+
+            engine.handlePlaylistModification(p);
+
             playlistRepository.update(p);
+
         }
 
-        PlaybackEngine.getInstance().notifyObservers();
+        engine.notifyObservers();
         
         System.out.println("[COMMAND] INFO: RemoveTrackCommand undone for track: " + track.getTitle());
         
