@@ -36,7 +36,9 @@ public class Playlist {
     }
 
     public void addTrack(Track track) {
-        tracks.add(track);
+        if (!tracks.contains(track)) {
+            tracks.add(track);
+        }
     }
 
     public void removeTrack(Track track) {
