@@ -25,6 +25,13 @@ public interface PlaylistRepository {
     void update(Playlist playlist);
 
     /**
+     * Aggiorna il nome una playlist esistente identificata dal suo ID.
+     *
+     * playlist è la playlist con i nuovi dati
+     */
+    void updateName(Playlist playlist);
+
+    /**
      * Elimina una playlist identificata dal suo ID.
      *
      * playlistId è l'identificativo della playlist da eliminare
