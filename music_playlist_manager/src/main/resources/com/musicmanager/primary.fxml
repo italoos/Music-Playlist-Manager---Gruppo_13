@@ -17,6 +17,8 @@
       <HBox prefHeight="40.0" spacing="10.0" style="-fx-padding: 10;">
          <children>
 
+            <Button fx:id="undoButton" mnemonicParsing="false" onAction="#handleUndo" text="↶ Annulla Ultima Azione" />
+
             <Button fx:id="addTrackButton" mnemonicParsing="false" onAction="#handleAddTrackButtonClick" text="Aggiungi Brano" />
 
             <Button fx:id="addPlaylistButton" mnemonicParsing="false" onAction="#handleCreatePlaylist" text="Crea Playlist" />

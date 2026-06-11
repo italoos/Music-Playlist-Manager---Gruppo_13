@@ -13,6 +13,8 @@ public class RemoveTrackFromPlaylistCommand implements Command {
     private final Track track;
     private final PlaylistRepository playlistRepository;
 
+    private int index;
+
     /** Indica se il brano era in riproduzione nella playlist al momento della rimozione. */
 
     private boolean wasPlayingInThisPlaylist = false;
@@ -21,6 +23,7 @@ public class RemoveTrackFromPlaylistCommand implements Command {
         this.playlist = playlist;
         this.track = track;
         this.playlistRepository = playlistRepository;
+        this.index = -1;
     }
 
     /** Rimuove il brano dalla playlist, aggiornando il database, la UI e la riproduzione corrente quando necessario. */
@@ -35,6 +38,8 @@ public class RemoveTrackFromPlaylistCommand implements Command {
             engine.nextTrack();
         }
 
+        index = playlist.getTracks().indexOf(track);
+
         playlist.removeTrack(track);
         playlistRepository.update(playlist);
         
@@ -47,7 +52,12 @@ public class RemoveTrackFromPlaylistCommand implements Command {
     @Override
     public void undo() {
 
-        playlist.addTrack(track);
+        if (index >= 0 && index <= playlist.getTracks().size()) {
+            playlist.getTracks().add(index, track);
+        } else {
+            playlist.addTrack(track);
+        }
+
         playlistRepository.update(playlist);
         
         PlaybackEngine engine = PlaybackEngine.getInstance();
