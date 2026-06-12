@@ -7,6 +7,8 @@ import java.util.Optional;
 import com.musicmanager.MediaPlayerUI;
 import com.musicmanager.PlaybackEngine;
 import com.musicmanager.PlaybackStrategy;
+import com.musicmanager.PlaylistGenerator;
+import com.musicmanager.PlaylistGeneratorFactory;
 import com.musicmanager.model.Playlist;
 import com.musicmanager.model.Track;
 import com.musicmanager.repository.PlaylistRepository;
@@ -21,6 +23,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListCell;
@@ -58,6 +61,9 @@ public class MainController {
     private Button addTrackToPlaylistButton;
     @FXML
     private Button playPlaylistButton;
+
+    @FXML
+    private Button generatePlaylistButton;
 
     private Playlist selectedPlaylist;
 
@@ -985,6 +991,126 @@ public class MainController {
     @FXML
     private void handleBackToPlaylists() {
         showPlaylistsView();
+    }
+
+    @FXML
+    public void handleGeneratePlaylist() {
+        // Se non ci sono brani nel catalogo, non possiamo generare nulla
+        if (tracks.isEmpty()) {
+            showInvalidPlaylistNameAlert("Non ci sono brani disponibili nel sistema per generare una playlist.");
+            return;
+        }
+
+        // Creazione del Dialog personalizzato
+        Dialog<ButtonType> dialog = new Dialog<>();
+        dialog.setTitle("Generazione Automatica Playlist");
+        dialog.setHeaderText("Configura i criteri per la generazione automatica");
+
+        ButtonType generateButtonType = new ButtonType("Genera", ButtonBar.ButtonData.OK_DONE);
+        dialog.getDialogPane().getButtonTypes().addAll(generateButtonType, ButtonType.CANCEL);
+
+        // Componenti del Form
+        TextField nameField = new TextField();
+        nameField.setPromptText("Nome della playlist");
+
+        ComboBox<String> typeComboBox = new ComboBox<>();
+        typeComboBox.getItems().addAll("Genere", "Anno");
+        typeComboBox.setValue("Genere"); // Valore di default
+
+        ComboBox<String> criteriaComboBox = new ComboBox<>();
+        
+        // Funzione interna per ripopolare la ComboBox dei criteri in base alla scelta (Genere o Anno)
+        Runnable updateCriteriaOptions = () -> {
+            criteriaComboBox.getItems().clear();
+            if ("Genere".equals(typeComboBox.getValue())) {
+                // Estrae tutti i generi unici e non nulli, ordinati alfabeticamente
+                java.util.List<String> uniqueGenres = tracks.stream()
+                        .map(Track::getGenre)
+                        .filter(g -> g != null && !g.trim().isEmpty())
+                        .distinct()
+                        .sorted()
+                        .toList();
+                criteriaComboBox.getItems().addAll(uniqueGenres);
+            } else {
+                // Estrae tutti gli anni unici convertiti in stringa, ordinati
+                java.util.List<String> uniqueYears = tracks.stream()
+                        .map(Track::getYear)
+                        .filter(y -> y > 0)
+                        .distinct()
+                        .sorted()
+                        .map(String::valueOf)
+                        .toList();
+                criteriaComboBox.getItems().addAll(uniqueYears);
+            }
+            if (!criteriaComboBox.getItems().isEmpty()) {
+                criteriaComboBox.setValue(criteriaComboBox.getItems().get(0));
+            }
+        };
+
+        // Aggiorna le opzioni la prima volta e ogni volta che cambia il tipo di filtro
+        updateCriteriaOptions.run();
+        typeComboBox.setOnAction(e -> updateCriteriaOptions.run());
+
+        // Disposizione grafica nel Dialog via GridPane
+        GridPane grid = new GridPane();
+        grid.setHgap(10);
+        grid.setVgap(10);
+        grid.setStyle("-fx-padding: 20;");
+        grid.addRow(0, new Label("Nome Playlist:"), nameField);
+        grid.addRow(1, new Label("Filtra per:"), typeComboBox);
+        grid.addRow(2, new Label("Seleziona Valore:"), criteriaComboBox);
+
+        dialog.getDialogPane().setContent(grid);
+
+        // Mostra il dialog e attende la conferma dell'utente
+        Optional<ButtonType> result = dialog.showAndWait();
+
+        if (result.isPresent() && result.get() == generateButtonType) {
+            String playlistName = nameField.getText().trim();
+            String selectedType = typeComboBox.getValue();
+            String selectedCriteria = criteriaComboBox.getValue();
+
+            // Validazione del nome
+            if (!isValidPlaylistName(playlistName)) {
+                showInvalidPlaylistNameAlert("Il nome della playlist è vuoto o esiste già una playlist con questo nome.");
+                return;
+            }
+
+            //  Validazione del criterio selezionato
+            if (selectedCriteria == null || selectedCriteria.isEmpty()) {
+                showInvalidPlaylistNameAlert("Seleziona un valore valido per il genere o l'anno.");
+                return;
+            }
+
+            // Mappiamo la scelta della GUI alla stringa attesa dalla Factory ("GENRE" o "YEAR")
+            String factoryType = "Genere".equals(selectedType) ? "GENRE" : "YEAR";
+
+            try {
+                // Otteniamo il generatore corretto dalla Factory
+                PlaylistGenerator generator = PlaylistGeneratorFactory.getGenerator(factoryType, selectedCriteria);
+
+                // Generiamo la playlist passando la lista completa di tracce presenti in memoria
+                Playlist generatedPlaylist = generator.generate(playlistName, new java.util.ArrayList<>(tracks));
+
+                // Controllo di sicurezza: se nessuna traccia rispetta il criterio
+                if (generatedPlaylist.getTracks().isEmpty()) {
+                    showInvalidPlaylistNameAlert("Nessun brano corrisponde al criterio selezionato.");
+                    return;
+                }
+
+                // salvataggio definitivo nel Database
+                playlistRepository.save(generatedPlaylist);
+
+                // Ricarica la lista sulla barra laterale per mostrare la nuova playlist generata
+                playlists.setAll(playlistRepository.findAll());
+
+                System.out.println("[MAIN CONTROLLER] INFO: Playlist '" + playlistName + "' generata automaticamente con successo.");
+
+            } catch (Exception e) {
+                System.err.println("[MAIN CONTROLLER] ERROR durante la generazione: " + e.getMessage());
+                showInvalidPlaylistNameAlert("Errore durante la generazione automatica: " + e.getMessage());
+            }
+        }
     }
 
     /*

@@ -22,7 +22,9 @@
             <Button fx:id="addTrackButton" mnemonicParsing="false" onAction="#handleAddTrackButtonClick" text="Aggiungi Brano" />
 
             <Button fx:id="addPlaylistButton" mnemonicParsing="false" onAction="#handleCreatePlaylist" text="Crea Playlist" />
-
+             
+            <Button fx:id="generatePlaylistButton" mnemonicParsing="false" onAction="#handleGeneratePlaylist" text="⚙ Genera Playlist Aut." />
+            
          </children>
       </HBox>
       <SplitPane dividerPositions="0.2505567928730512, 0.7505567928730512" focusTraversable="true" prefHeight="-1.0" prefWidth="-1.0" VBox.vgrow="ALWAYS">
