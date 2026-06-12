@@ -90,67 +90,6 @@ public class PlaylistRepositoryImpl implements PlaylistRepository {
         }
     }
 
-    //Aggiorna il nome della Playlist selezionata e le tracce associate
-    @Override
-    public void updateName(Playlist playlist) {
-
-        String updatePlaylist = "UPDATE Playlists SET name = ? WHERE id = ?;";
-        String deleteRelations = "DELETE FROM Playlist_Tracks WHERE playlist_id = ?;";
-        String insertRelation = "INSERT INTO Playlist_Tracks (playlist_id, track_id) VALUES (?, ?);";
-
-        Connection conn = null;
-        try {
-            conn = DatabaseManager.getInstance().getConnection();
-            conn.setAutoCommit(false);
-
-            // Aggiorna il nome della playlist
-            try (PreparedStatement ps = conn.prepareStatement(updatePlaylist)) {
-                ps.setString(1, playlist.getName());
-                ps.setInt(2, playlist.getId());
-                ps.executeUpdate();
-            }
-
-            // Rimuove tutte le tracce associate attuali
-            try (PreparedStatement ps = conn.prepareStatement(deleteRelations)) {
-                ps.setInt(1, playlist.getId());
-                ps.executeUpdate();
-            }
-
-            // Reinserisce tutte le tracce della playlist aggiornata
-            if (playlist.getTracks() != null && !playlist.getTracks().isEmpty()) {
-                try (PreparedStatement ps = conn.prepareStatement(insertRelation)) {
-                    for (Track t : playlist.getTracks()) {
-                        ps.setInt(1, playlist.getId());
-                        ps.setInt(2, t.getId());
-                        ps.addBatch();
-                    }
-                    ps.executeBatch();
-                }
-            }
-
-            conn.commit();
-            System.out.println("[DB] Playlist aggiornata con successo (ID: " + playlist.getId() + ", tracce: " + (playlist.getTracks() != null ? playlist.getTracks().size() : 0) + ").");
-
-        } catch (SQLException e) {
-            System.err.println("[DB ERROR] update failed: " + e.getMessage());
-            if (conn != null) {
-                try {
-                    conn.rollback();
-                } catch (SQLException ex) {
-                    System.err.println("[DB ERROR] rollback failed: " + ex.getMessage());
-                }
-            }
-        } finally {
-            if (conn != null) {
-                try {
-                    conn.setAutoCommit(true);
-                } catch (SQLException e) {
-                    System.err.println("[DB ERROR] setAutoCommit failed: " + e.getMessage());
-                }
-            }
-        }
-    }
-
      @Override
     public void update(Playlist playlist) {
 

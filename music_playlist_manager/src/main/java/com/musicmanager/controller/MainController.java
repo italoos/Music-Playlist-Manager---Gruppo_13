@@ -544,13 +544,18 @@ public class MainController {
     /** Aggiorna la UI della playlist con i dati aggiornati presenti nel repository. */
 
     private void refreshPlaylistDetailsUI() {
-        if (selectedPlaylist != null) {
-            Playlist updated = playlistRepository.findById(selectedPlaylist.getId());
-            if (updated != null) {
-                selectedPlaylist = updated;
-                playlistTracksListView.setItems(FXCollections.observableArrayList(updated.getTracks()));
-            }
+
+        if (selectedPlaylist == null) {
+            return;
         }
+
+        playlistTracksListView.setItems(
+            FXCollections.observableArrayList(
+                selectedPlaylist.getTracks()
+            )
+        );
+
+        playlistTracksListView.refresh();
     }
 
     private void showPlaylistOperationAlert(String header, String content) {
@@ -894,10 +899,9 @@ public class MainController {
                 return;
             }
 
-            String oldName = playlist.getName();
             playlist.setName(trimmedName);
 
-            playlistRepository.updateName(playlist);
+            playlistRepository.update(playlist);
 
             playlistListView.refresh();
         });
@@ -948,17 +952,13 @@ public class MainController {
      */
     private void showPlaylistDetails(Playlist playlist) {
 
-        Playlist fullPlaylist = playlistRepository.findById(playlist.getId());
+        selectedPlaylist = playlist;
 
-        if (fullPlaylist == null) return;
-
-        selectedPlaylist = fullPlaylist;
-
-        this.detailsTitleLabel.setText(fullPlaylist.getName());
+        this.detailsTitleLabel.setText(playlist.getName());
 
         playlistTracksListView.setItems(
                 FXCollections.observableArrayList(
-                        fullPlaylist.getTracks()
+                    playlist.getTracks()
                 )
         );
 
