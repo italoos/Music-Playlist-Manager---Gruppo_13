@@ -153,12 +153,37 @@ public class MainController implements PlaybackObserver {
 
         mostPlayedTracksListView.setPlaceholder(new Label("Nessun brano disponibile"));
         mostPlayedTracksListView.setCellFactory(listView -> new ListCell<Track>() {
+
+            private final Label trackLabel = new Label();
+            private final Region spacer = new Region();
+            private final Button playButton = new Button("▶");
+            private final HBox content = new HBox(16, trackLabel, spacer, playButton);
+
+            {
+                HBox.setHgrow(spacer, Priority.ALWAYS);
+                trackLabel.setMaxWidth(Double.MAX_VALUE);
+                playButton.visibleProperty().bind(hoverProperty());
+                playButton.managedProperty().bind(playButton.visibleProperty());
+                playButton.setOnAction(event -> playTrack(getItem()));
+            }
+
             @Override
             protected void updateItem(Track track, boolean empty) {
                 super.updateItem(track, empty);
-                setText(empty || track == null
-                    ? null
-                    : track.getTitle() + " - " + track.getAuthor() + "   [" + track.getPlayCount() + "]");
+
+                if (empty || track == null) {
+                    setText(null);
+                    setGraphic(null);
+                    return;
+                }
+
+                String playCountText = track.getPlayCount() == 1 ? " ascolto" : " ascolti";
+                trackLabel.setText(
+                    track.getTitle() + " - " + track.getAuthor()
+                        + "   [" + track.getPlayCount() + playCountText + "]"
+                );
+                setText(null);
+                setGraphic(content);
             }
         });
 
@@ -247,7 +272,7 @@ public class MainController implements PlaybackObserver {
                 return;
             }
 
-            trackLabel.setText(track.getTitle() + " - " + track.getAuthor() + "  (" + track.getGenre() + ", " + track.getYear() + ")   [" + track.getPlayCount() + "]");
+            trackLabel.setText(track.getTitle() + " - " + track.getAuthor() + "  (" + track.getGenre() + ", " + track.getYear() + ")");
 
             setText(null);
             setGraphic(content);
@@ -379,7 +404,7 @@ public class MainController implements PlaybackObserver {
             }
 
             trackLabel.setText(track.getTitle() + " - " + track.getAuthor()
-                    + "  (" + track.getGenre() + ", " + track.getYear() + ")   [" + track.getPlayCount() + "]");
+                    + "  (" + track.getGenre() + ", " + track.getYear() + ")");
 
             setText(null);
             setGraphic(content);
