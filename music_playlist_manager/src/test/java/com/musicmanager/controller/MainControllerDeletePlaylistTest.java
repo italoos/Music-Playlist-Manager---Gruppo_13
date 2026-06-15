@@ -59,6 +59,11 @@ class MainControllerDeletePlaylistTest {
             return new ArrayList<>(storage);
         }
 
+        @Override
+        public List<Playlist> findAllByPlayCount() {
+            return new ArrayList<>(storage);
+        }
+
     }
 
     private static class EmptyTrackRepository implements TrackRepository {
@@ -117,7 +122,7 @@ class MainControllerDeletePlaylistTest {
         setControllerField("playlistListView", playlistListView);
 
         track = new Track(1, "Bad Guy", "Billie Eilish", 194, "Pop", 2019, 0);
-        playlist = new Playlist(1, "Preferiti");
+        playlist = new Playlist(1, "Preferiti", 0);
         playlist.addTrack(track);
 
         repository.save(playlist);

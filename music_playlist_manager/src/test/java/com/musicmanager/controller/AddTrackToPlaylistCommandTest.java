@@ -66,6 +66,11 @@ class AddTrackToPlaylistCommandTest {
             return new ArrayList<>(storage);
         }
 
+        @Override
+        public List<Playlist> findAllByPlayCount() {
+            return new ArrayList<>(storage);
+        }
+
     }
 
     private InMemoryPlaylistRepository repository;
@@ -95,7 +100,7 @@ class AddTrackToPlaylistCommandTest {
     void setUp() {
 
         repository = new InMemoryPlaylistRepository();
-        playlist = new Playlist(1, "Preferiti");
+        playlist = new Playlist(1, "Preferiti", 0);
         track = new Track(1, "Bad Guy", "Billie Eilish", 194, "Pop", 2019, 0);
 
         repository.save(playlist);

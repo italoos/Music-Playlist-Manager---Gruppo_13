@@ -67,6 +67,11 @@ class RemoveTrackCommandTest {
             return new ArrayList<>(storage);
         }
 
+        @Override
+        public List<Playlist> findAllByPlayCount() {
+            return new ArrayList<>(storage);
+        }
+
     }
 
     /** Implementazione in-memory di TrackRepository usata per simulare la persistenza delle tracce durante i test. */
@@ -138,7 +143,7 @@ class RemoveTrackCommandTest {
         repository = new InMemoryTrackRepository();
         playlistRepository = new InMemoryPlaylistRepository();
         track = new Track(1, "Bad Guy", "Billie Eilish", 194, "Pop", 2019, 0);
-        playlist = new Playlist(1, "Preferiti");
+        playlist = new Playlist(1, "Preferiti", 0);
         playlist.addTrack(track);
 
         repository.save(track);

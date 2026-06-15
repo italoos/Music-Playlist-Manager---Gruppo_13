@@ -214,8 +214,8 @@ public class PlaylistRepositoryImpl implements PlaylistRepository {
 
         
         String sql =
-                "SELECT p.id, p.name, " +
-                "t.id AS tid, t.title, t.author, t.length, t.genre, t.\"year\" " +
+                "SELECT p.id, p.name, p.playCount, " +
+                "t.id AS tid, t.title, t.author, t.length, t.genre, t.\"year\", t.playCount" +
                 "FROM Playlists p " +
                 "LEFT JOIN Playlist_Tracks pt ON p.id = pt.playlist_id " +
                 "LEFT JOIN Tracks t ON t.id = pt.track_id " +
@@ -233,7 +233,8 @@ public class PlaylistRepositoryImpl implements PlaylistRepository {
                         if (playlist == null) {
                             playlist = new Playlist(
                                     rs.getInt("id"),
-                                    rs.getString("name")
+                                    rs.getString("name"),
+                                    rs.getInt("playCount")
                             );
                         }
 
@@ -270,8 +271,8 @@ public class PlaylistRepositoryImpl implements PlaylistRepository {
     public List<Playlist> findAll() {
 
        String sql =
-        "SELECT p.id AS pid, p.name, " +
-        "t.id AS tid, t.title, t.author, t.length, t.genre, t.\"year\" " +
+        "SELECT p.id AS pid, p.name, p.playCount, " +
+        "t.id AS tid, t.title, t.author, t.length, t.genre, t.\"year\", t.playCount " +
         "FROM Playlists p " +
         "LEFT JOIN Playlist_Tracks pt ON p.id = pt.playlist_id " +
         "LEFT JOIN Tracks t ON t.id = pt.track_id " +
@@ -292,7 +293,73 @@ public class PlaylistRepositoryImpl implements PlaylistRepository {
                     Playlist playlist = map.get(pid);
 
                     if (playlist == null) {
-                        playlist = new Playlist(pid, rs.getString("name"));
+                        playlist = new Playlist(
+                            pid, 
+                            rs.getString("name"), 
+                            rs.getInt("playCount")
+                        );
+                        map.put(pid, playlist);
+                    }
+
+                    int trackId = rs.getInt("tid");
+                    // Se la riga corrente del join contiene una traccia valida, la colleghiamo alla playlist corrispondente
+                    if (trackId > 0) {
+                        playlist.addTrack(new Track(
+                                trackId,
+                                rs.getString("title"),
+                                rs.getString("author"),
+                                rs.getInt("length"),
+                                rs.getString("genre"),
+                                rs.getInt("year"),
+                                rs.getInt("playCount")
+                        ));
+                    }
+                }
+            }
+
+            return new ArrayList<>(map.values());
+
+        } catch (SQLException e) {
+            System.err.println("[DB ERROR] findAll failed: " + e.getMessage());
+            return new ArrayList<>();
+        }
+    }
+
+    /**
+     * Recupera tutte le playlist memorizzate nel sistema, incluse le tracce associate a ciascuna di esse.
+     * * @return Una lista contenente tutte le Playlist caricate dal database.
+     */
+    @Override
+    public List<Playlist> findAllByPlayCount() {
+
+       String sql =
+        "SELECT p.id AS pid, p.name, p.playCount, " +
+        "t.id AS tid, t.title, t.author, t.length, t.genre, t.\"year\", t.playCount " +
+        "FROM Playlists p " +
+        "LEFT JOIN Playlist_Tracks pt ON p.id = pt.playlist_id " +
+        "LEFT JOIN Tracks t ON t.id = pt.track_id " +
+        "ORDER BY p.playCount LIMIT 10;";
+
+        try {
+            Connection conn = DatabaseManager.getInstance().getConnection();
+
+            // usiamo una LinkedHashMap per aggregare le righe del database mantenendo l'ordine di inserimento delle playlist
+            Map<Integer, Playlist> map = new LinkedHashMap<>();
+
+            try (PreparedStatement ps = conn.prepareStatement(sql);
+                 ResultSet rs = ps.executeQuery()) {
+
+                while (rs.next()) {
+
+                    int pid = rs.getInt("pid");
+                    Playlist playlist = map.get(pid);
+
+                    if (playlist == null) {
+                        playlist = new Playlist(
+                            pid, 
+                            rs.getString("name"), 
+                            rs.getInt("playCount")
+                        );
                         map.put(pid, playlist);
                     }
 

@@ -52,6 +52,11 @@ class MainControllerUpdateTrackTest {
             return new ArrayList<>();
         }
 
+        @Override
+        public List<Playlist> findAllByPlayCount() {
+            return new ArrayList<>();
+        }
+
     }
 
     /** Implementazione in-memory di TrackRepository usata per simulare la persistenza delle tracce durante i test. */
