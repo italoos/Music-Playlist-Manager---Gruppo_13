@@ -66,6 +66,11 @@ class RemoveTrackFromPlaylistCommandTest {
             return new ArrayList<>(storage);
         }
 
+        @Override
+        public List<Playlist> findAllByPlayCount() {
+            return new ArrayList<>(storage);
+        }
+
     }
 
     private InMemoryPlaylistRepository repository;
@@ -95,8 +100,8 @@ class RemoveTrackFromPlaylistCommandTest {
     void setUp() {
 
         repository = new InMemoryPlaylistRepository();
-        playlist = new Playlist(1, "Preferiti");
-        track = new Track(1, "Bad Guy", "Billie Eilish", 194, "Pop", 2019);
+        playlist = new Playlist(1, "Preferiti", 0);
+        track = new Track(1, "Bad Guy", "Billie Eilish", 194, "Pop", 2019, 0);
 
         playlist.addTrack(track);
         repository.save(playlist);
@@ -153,8 +158,8 @@ class RemoveTrackFromPlaylistCommandTest {
     @Test
     void undoRestoresTrackToItsExactOriginalIndexInPlaylist() {
 
-        Track trackPrima = new Track(10, "Traccia Prima", "Autore A", 180, "Pop", 2020);
-        Track trackDopo = new Track(12, "Traccia Dopo", "Autore B", 200, "Pop", 2021);
+        Track trackPrima = new Track(10, "Traccia Prima", "Autore A", 180, "Pop", 2020, 0);
+        Track trackDopo = new Track(12, "Traccia Dopo", "Autore B", 200, "Pop", 2021, 0);
 
         playlist.getTracks().add(0, trackPrima);
         playlist.getTracks().add(trackDopo);

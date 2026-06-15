@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.musicmanager.model.Playlist;
 import com.musicmanager.model.Track;
+import com.musicmanager.repository.TrackRepository;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.util.Duration;
@@ -20,6 +21,8 @@ public class PlaybackEngine {
     private Timeline timeline;
     private PlayerState currentState;
     private PlaybackStrategy strategy;
+    private TrackRepository trackRepository;
+    private boolean trackNeedsPlayCountIncrement;
     
 
     /**
@@ -125,7 +128,29 @@ public class PlaybackEngine {
      * Inizia la riproduzione della traccia corrente.
      */
     public void play() {
+        if (currentTrack == null) {
+            return;
+        }
+
+        boolean wasPlaying = isPlaying();
+        boolean playCountIncremented = false;
+
+        if (trackNeedsPlayCountIncrement) {
+            currentTrack.incrementPlayCount();
+            if (trackRepository != null) {
+                trackRepository.update(currentTrack);
+            }
+            trackNeedsPlayCountIncrement = false;
+            playCountIncremented = true;
+        }
+
         currentState.play(this);
+
+        // PausedState notifica gia' il cambio di stato. PlayingState invece non
+        // notifica, quindi serve un aggiornamento esplicito per il nuovo conteggio.
+        if (playCountIncremented && wasPlaying) {
+            notifyObservers();
+        }
     }
 
     /**
@@ -149,6 +174,7 @@ public class PlaybackEngine {
     public void setCurrentTrack(Track currentTrack) {
         this.currentTrack = currentTrack;
         this.currentTime = 0;
+        this.trackNeedsPlayCountIncrement = currentTrack != null;
         notifyObservers();
     }
 
@@ -207,6 +233,10 @@ public class PlaybackEngine {
      */
     public void setStrategy(PlaybackStrategy strategy) {
         this.strategy = strategy;
+    }
+
+    public void setTrackRepository(TrackRepository trackRepository) {
+        this.trackRepository = trackRepository;
     }
 
     /**

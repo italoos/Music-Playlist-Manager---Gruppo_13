@@ -45,4 +45,10 @@ public interface PlaylistRepository {
      * Restituisce lista di tutte le playlist
      */
     List<Playlist> findAll();
+
+    /**
+     * Trova tutte le playlist in ordine del numero di riproduzione
+     * @return la lista di playlist in ordine di numero di riproduzioni
+     */
+    List<Playlist> findAllByPlayCount();
 }

@@ -21,9 +21,9 @@ class TrackLoopStrategyTest {
     @BeforeEach
     void setUp() {
         strategy = new TrackLoopStrategy();
-        firstTrack = new Track(1, "First", "Artist A", 180, "Rock", 2020);
-        secondTrack = new Track(2, "Second", "Artist B", 210, "Pop", 2021);
-        thirdTrack = new Track(3, "Third", "Artist C", 240, "Jazz", 2022);
+        firstTrack = new Track(1, "First", "Artist A", 180, "Rock", 2020, 0);
+        secondTrack = new Track(2, "Second", "Artist B", 210, "Pop", 2021, 0);
+        thirdTrack = new Track(3, "Third", "Artist C", 240, "Jazz", 2022, 0);
         tracks = List.of(firstTrack, secondTrack, thirdTrack);
     }
 

@@ -67,7 +67,7 @@ public class TrackFileParser {
         }
 
 
-        return new Track(0, title, author, length, genre, year);
+        return new Track(0, title, author, length, genre, year, 0);
 
     }
     

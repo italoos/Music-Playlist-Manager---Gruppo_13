@@ -10,14 +10,16 @@ public class Track {
     private int length;
     private String genre;
     private int year;
+    private int playCount;
 
-    public Track(int id, String title, String author, int length, String genre, int year) {
+    public Track(int id, String title, String author, int length, String genre, int year, int playCount) {
         this.id = id;
         this.title = title;
         this.author = author;
         this.length = length;
         this.genre = genre;
         this.year = year;
+        this.playCount = playCount;
     }
 
     public int getId() {
@@ -67,6 +69,15 @@ public class Track {
 
     public void setYear(int year) {
         this.year = year;
+    }
+
+
+    public int getPlayCount() {
+        return playCount;
+    }
+
+    public void incrementPlayCount(){
+        this.playCount ++;
     }
 
     @Override

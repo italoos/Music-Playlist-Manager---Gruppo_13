@@ -67,6 +67,11 @@ class RemoveTrackCommandTest {
             return new ArrayList<>(storage);
         }
 
+        @Override
+        public List<Playlist> findAllByPlayCount() {
+            return new ArrayList<>(storage);
+        }
+
     }
 
     /** Implementazione in-memory di TrackRepository usata per simulare la persistenza delle tracce durante i test. */
@@ -77,6 +82,11 @@ class RemoveTrackCommandTest {
 
         @Override
         public List<Track> findAll() {
+            return new ArrayList<>(storage);
+        }
+
+        @Override
+        public List<Track> findAllByPlayCount() {
             return new ArrayList<>(storage);
         }
 
@@ -132,8 +142,8 @@ class RemoveTrackCommandTest {
 
         repository = new InMemoryTrackRepository();
         playlistRepository = new InMemoryPlaylistRepository();
-        track = new Track(1, "Bad Guy", "Billie Eilish", 194, "Pop", 2019);
-        playlist = new Playlist(1, "Preferiti");
+        track = new Track(1, "Bad Guy", "Billie Eilish", 194, "Pop", 2019, 0);
+        playlist = new Playlist(1, "Preferiti", 0);
         playlist.addTrack(track);
 
         repository.save(track);
@@ -179,8 +189,8 @@ class RemoveTrackCommandTest {
     @Test
     void undoRestoresTrackToItsExactOriginalIndexInCatalogAndPlaylists() {
 
-        Track trackPrima = new Track(10, "Traccia Prima", "Autore A", 180, "Pop", 2020);
-        Track trackDopo = new Track(12, "Traccia Dopo", "Autore B", 200, "Pop", 2021);
+        Track trackPrima = new Track(10, "Traccia Prima", "Autore A", 180, "Pop", 2020, 0);
+        Track trackDopo = new Track(12, "Traccia Dopo", "Autore B", 200, "Pop", 2021, 0);
 
         trackList.add(0, trackPrima);
         trackList.add(trackDopo);

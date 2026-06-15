@@ -52,6 +52,11 @@ class MainControllerUpdateTrackTest {
             return new ArrayList<>();
         }
 
+        @Override
+        public List<Playlist> findAllByPlayCount() {
+            return new ArrayList<>();
+        }
+
     }
 
     /** Implementazione in-memory di TrackRepository usata per simulare la persistenza delle tracce durante i test. */
@@ -63,6 +68,11 @@ class MainControllerUpdateTrackTest {
 
         @Override
         public List<Track> findAll() {
+            return new ArrayList<>(storage);
+        }
+
+        @Override
+        public List<Track> findAllByPlayCount() {
             return new ArrayList<>(storage);
         }
 
@@ -120,7 +130,7 @@ class MainControllerUpdateTrackTest {
         setControllerField("playlistListView", new ListView<Playlist>());
         setControllerField("playlistTracksListView", new ListView<Track>());
 
-        originalTrack = new Track(1, "Bad Guy", "Billie Eilish", 194, "Pop", 2019);
+        originalTrack = new Track(1, "Bad Guy", "Billie Eilish", 194, "Pop", 2019, 0);
         repository.save(originalTrack);
         controller.getTracks().add(originalTrack);
 
@@ -139,7 +149,7 @@ class MainControllerUpdateTrackTest {
     @Test
     void handleUpdateTrackUpdatesTrackFieldsListAndRepository() {
 
-        Track updatedTrack = new Track(1, "Ocean Eyes", "Billie Eilish", 180, "Alternative", 2016);
+        Track updatedTrack = new Track(1, "Ocean Eyes", "Billie Eilish", 180, "Alternative", 2016, 0);
 
         controller.handleUpdateTrack(originalTrack, updatedTrack);
 
@@ -163,7 +173,7 @@ class MainControllerUpdateTrackTest {
     void handleUpdateTrackWithInvalidInputDoesNotChangeTrackOrRepository() {
 
         controller.handleUpdateTrack(originalTrack, null);
-        controller.handleUpdateTrack(null, new Track(1, "Ocean Eyes", "Billie Eilish", 180, "Alternative", 2016));
+        controller.handleUpdateTrack(null, new Track(1, "Ocean Eyes", "Billie Eilish", 180, "Alternative", 2016, 0));
 
         assertEquals("Bad Guy", originalTrack.getTitle());
         assertEquals("Billie Eilish", originalTrack.getAuthor());
