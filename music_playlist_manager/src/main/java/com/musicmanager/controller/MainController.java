@@ -2,6 +2,7 @@ package com.musicmanager.controller;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -20,6 +21,7 @@ import com.musicmanager.repository.TrackRepository;
 import com.musicmanager.repository.TrackRepositoryImpl;
 
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -55,6 +57,10 @@ public class MainController implements PlaybackObserver {
     private ListView<Playlist> playlistListView;
     @FXML
     private ListView<Track> playlistTracksListView;
+    @FXML
+    private ListView<Track> mostPlayedTracksListView;
+    @FXML
+    private ListView<Playlist> mostPlayedPlaylistsListView;
     @FXML
     private Label detailsTitleLabel;
     @FXML
@@ -112,6 +118,7 @@ public class MainController implements PlaybackObserver {
         playbackEngine.notifyObservers();
         initializePlaylistSection();
         loadTracksFromDatabase();
+        initializeMostPlayedLists();
     }
 
     @Override
@@ -136,6 +143,67 @@ public class MainController implements PlaybackObserver {
         if (playlistTracksListView != null) {
             playlistTracksListView.refresh();
         }
+
+        refreshMostPlayedLists();
+    }
+
+    private void initializeMostPlayedLists() {
+        tracks.addListener((ListChangeListener<Track>) change -> refreshMostPlayedLists());
+        playlists.addListener((ListChangeListener<Playlist>) change -> refreshMostPlayedLists());
+
+        mostPlayedTracksListView.setPlaceholder(new Label("Nessun brano disponibile"));
+        mostPlayedTracksListView.setCellFactory(listView -> new ListCell<Track>() {
+            @Override
+            protected void updateItem(Track track, boolean empty) {
+                super.updateItem(track, empty);
+                setText(empty || track == null
+                    ? null
+                    : track.getTitle() + " - " + track.getAuthor() + "   [" + track.getPlayCount() + "]");
+            }
+        });
+
+        mostPlayedPlaylistsListView.setPlaceholder(new Label("Nessuna playlist disponibile"));
+        mostPlayedPlaylistsListView.setCellFactory(listView -> new ListCell<Playlist>() {
+            @Override
+            protected void updateItem(Playlist playlist, boolean empty) {
+                super.updateItem(playlist, empty);
+                setText(empty || playlist == null
+                    ? null
+                    : playlist.getName() + "   [" + getPlaylistPlayCount(playlist) + "]");
+            }
+        });
+
+        refreshMostPlayedLists();
+    }
+
+    private void refreshMostPlayedLists() {
+        if (mostPlayedTracksListView == null || mostPlayedPlaylistsListView == null) {
+            return;
+        }
+
+        mostPlayedTracksListView.getItems().setAll(
+            tracks.stream()
+                .sorted(Comparator.comparingInt(Track::getPlayCount).reversed())
+                .limit(10)
+                .toList()
+        );
+
+        mostPlayedPlaylistsListView.getItems().setAll(
+            playlists.stream()
+                .sorted(Comparator.comparingInt(this::getPlaylistPlayCount).reversed())
+                .limit(10)
+                .toList()
+        );
+    }
+
+    private int getPlaylistPlayCount(Playlist playlist) {
+        return playlist.getTracks().stream()
+            .mapToInt(playlistTrack -> tracks.stream()
+                .filter(track -> track.getId() == playlistTrack.getId())
+                .mapToInt(Track::getPlayCount)
+                .findFirst()
+                .orElse(playlistTrack.getPlayCount()))
+            .sum();
     }
 
     /**
@@ -596,6 +664,7 @@ public class MainController implements PlaybackObserver {
         );
 
         playlistTracksListView.refresh();
+        refreshMostPlayedLists();
     }
 
     private void showPlaylistOperationAlert(String header, String content) {
