@@ -215,7 +215,7 @@ public class PlaylistRepositoryImpl implements PlaylistRepository {
         
         String sql =
                 "SELECT p.id, p.name, p.playCount, " +
-                "t.id AS tid, t.title, t.author, t.length, t.genre, t.\"year\", t.playCount" +
+                "t.id AS tid, t.title, t.author, t.length, t.genre, t.\"year\", t.playCount " +
                 "FROM Playlists p " +
                 "LEFT JOIN Playlist_Tracks pt ON p.id = pt.playlist_id " +
                 "LEFT JOIN Tracks t ON t.id = pt.track_id " +
