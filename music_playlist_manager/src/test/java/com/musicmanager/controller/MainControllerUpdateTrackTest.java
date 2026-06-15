@@ -67,6 +67,11 @@ class MainControllerUpdateTrackTest {
         }
 
         @Override
+        public List<Track> findAllByPlayCount() {
+            return new ArrayList<>(storage);
+        }
+
+        @Override
         public void save(Track track) {
             storage.add(track);
         }
@@ -120,7 +125,7 @@ class MainControllerUpdateTrackTest {
         setControllerField("playlistListView", new ListView<Playlist>());
         setControllerField("playlistTracksListView", new ListView<Track>());
 
-        originalTrack = new Track(1, "Bad Guy", "Billie Eilish", 194, "Pop", 2019);
+        originalTrack = new Track(1, "Bad Guy", "Billie Eilish", 194, "Pop", 2019, 0);
         repository.save(originalTrack);
         controller.getTracks().add(originalTrack);
 
@@ -139,7 +144,7 @@ class MainControllerUpdateTrackTest {
     @Test
     void handleUpdateTrackUpdatesTrackFieldsListAndRepository() {
 
-        Track updatedTrack = new Track(1, "Ocean Eyes", "Billie Eilish", 180, "Alternative", 2016);
+        Track updatedTrack = new Track(1, "Ocean Eyes", "Billie Eilish", 180, "Alternative", 2016, 0);
 
         controller.handleUpdateTrack(originalTrack, updatedTrack);
 
@@ -163,7 +168,7 @@ class MainControllerUpdateTrackTest {
     void handleUpdateTrackWithInvalidInputDoesNotChangeTrackOrRepository() {
 
         controller.handleUpdateTrack(originalTrack, null);
-        controller.handleUpdateTrack(null, new Track(1, "Ocean Eyes", "Billie Eilish", 180, "Alternative", 2016));
+        controller.handleUpdateTrack(null, new Track(1, "Ocean Eyes", "Billie Eilish", 180, "Alternative", 2016, 0));
 
         assertEquals("Bad Guy", originalTrack.getTitle());
         assertEquals("Billie Eilish", originalTrack.getAuthor());

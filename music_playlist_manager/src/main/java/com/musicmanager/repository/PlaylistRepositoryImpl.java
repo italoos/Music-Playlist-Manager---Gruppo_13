@@ -246,7 +246,8 @@ public class PlaylistRepositoryImpl implements PlaylistRepository {
                                     rs.getString("author"),
                                     rs.getInt("length"),
                                     rs.getString("genre"),
-                                    rs.getInt("year")
+                                    rs.getInt("year"),
+                                    rs.getInt("playCount")
                             ));
                         }
                     }
@@ -304,7 +305,8 @@ public class PlaylistRepositoryImpl implements PlaylistRepository {
                                 rs.getString("author"),
                                 rs.getInt("length"),
                                 rs.getString("genre"),
-                                rs.getInt("year")
+                                rs.getInt("year"),
+                                rs.getInt("playCount")
                         ));
                     }
                 }

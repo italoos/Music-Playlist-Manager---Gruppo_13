@@ -69,6 +69,11 @@ class MainControllerDeletePlaylistTest {
         }
 
         @Override
+        public List<Track> findAllByPlayCount() {
+            return new ArrayList<>();
+        }
+
+        @Override
         public void save(Track track) {
         }
 
@@ -111,7 +116,7 @@ class MainControllerDeletePlaylistTest {
         playlistListView = new ListView<>();
         setControllerField("playlistListView", playlistListView);
 
-        track = new Track(1, "Bad Guy", "Billie Eilish", 194, "Pop", 2019);
+        track = new Track(1, "Bad Guy", "Billie Eilish", 194, "Pop", 2019, 0);
         playlist = new Playlist(1, "Preferiti");
         playlist.addTrack(track);
 

@@ -2,10 +2,13 @@ package com.musicmanager.controller;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import com.musicmanager.MediaPlayerUI;
 import com.musicmanager.PlaybackEngine;
+import com.musicmanager.PlaybackObserver;
 import com.musicmanager.PlaybackStrategy;
 import com.musicmanager.PlaylistGenerator;
 import com.musicmanager.PlaylistGeneratorFactory;
@@ -37,12 +40,13 @@ import javafx.scene.layout.Region;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
-public class MainController { 
+public class MainController implements PlaybackObserver { 
 
     private final CommandManager commandManager = new CommandManager();
     private final TrackRepository trackRepository;
     private final PlaybackEngine playbackEngine;
     private final PlaylistRepository playlistRepository;
+    private final Map<Integer, Integer> displayedPlayCounts = new HashMap<>();
 
     private final ObservableList<Track> tracks = FXCollections.observableArrayList();
     private final ObservableList<Playlist> playlists = FXCollections.observableArrayList();
@@ -75,6 +79,7 @@ public class MainController {
         this.trackRepository = trackRepository;
         this.playlistRepository = playlistRepository;
         this.playbackEngine = playbackEngine;
+        this.playbackEngine.setTrackRepository(trackRepository);
     }
 
     @FXML
@@ -103,9 +108,34 @@ public class MainController {
         playlistTracksListView.setCellFactory(listView -> new PlaylistTrackListCell());
         mediaPlayerUI.setController(this);
         playbackEngine.registerObserver(mediaPlayerUI);
+        playbackEngine.registerObserver(this);
         playbackEngine.notifyObservers();
         initializePlaylistSection();
         loadTracksFromDatabase();
+    }
+
+    @Override
+    public void update(Track currentTrack, Playlist currentPlaylist, int currentTime, boolean isPlaying) {
+        if (currentTrack == null) {
+            return;
+        }
+
+        Integer displayedPlayCount = displayedPlayCounts.put(
+            currentTrack.getId(),
+            currentTrack.getPlayCount()
+        );
+
+        if (displayedPlayCount != null && displayedPlayCount == currentTrack.getPlayCount()) {
+            return;
+        }
+
+        if (tracksListView != null) {
+            tracksListView.refresh();
+        }
+
+        if (playlistTracksListView != null) {
+            playlistTracksListView.refresh();
+        }
     }
 
     /**
@@ -149,7 +179,8 @@ public class MainController {
                 return;
             }
 
-            trackLabel.setText(track.getTitle() + " - " + track.getAuthor() + "  (" + track.getGenre() + ", " + track.getYear() + ")");
+            trackLabel.setText(track.getTitle() + " - " + track.getAuthor() + "  (" + track.getGenre() + ", " + track.getYear() + ")   [" + track.getPlayCount() + "]");
+
             setText(null);
             setGraphic(content);
         }
@@ -196,6 +227,7 @@ public class MainController {
             TextField lengthField = new TextField(String.valueOf(track.getLength()));
             TextField genreField = new TextField(track.getGenre());
             TextField yearField = new TextField(String.valueOf(track.getYear()));
+            TextField playCountField = new TextField(String.valueOf(track.getPlayCount()));
 
             GridPane form = new GridPane();
             form.setHgap(10);
@@ -205,6 +237,7 @@ public class MainController {
             form.addRow(2, new Label("Durata"), lengthField);
             form.addRow(3, new Label("Genere"), genreField);
             form.addRow(4, new Label("Anno"), yearField);
+            form.addRow(4, new Label("Numero di riproduzioni"), playCountField);
 
             dialog.getDialogPane().setContent(form);
             dialog.setResultConverter(button -> {
@@ -219,7 +252,8 @@ public class MainController {
                             authorField.getText(),
                             Integer.parseInt(lengthField.getText().trim()),
                             genreField.getText(),
-                            Integer.parseInt(yearField.getText().trim())
+                            Integer.parseInt(yearField.getText().trim()),
+                            Integer.parseInt(playCountField.getText().trim())
                     );
                 } catch (NumberFormatException e) {
                     showInvalidTrackEditAlert();
@@ -277,7 +311,7 @@ public class MainController {
             }
 
             trackLabel.setText(track.getTitle() + " - " + track.getAuthor()
-                    + "  (" + track.getGenre() + ", " + track.getYear() + ")");
+                    + "  (" + track.getGenre() + ", " + track.getYear() + ")   [" + track.getPlayCount() + "]");
 
             setText(null);
             setGraphic(content);

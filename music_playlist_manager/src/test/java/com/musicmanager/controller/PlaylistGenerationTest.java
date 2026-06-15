@@ -25,11 +25,11 @@ class PlaylistGenerationTest {
         catalogoBrani = new ArrayList<>();
         
         // Prepariamo un catalogo di brani simulato per il test
-        catalogoBrani.add(new Track(1, "Bohemian Rhapsody", "Queen", 354, "Rock", 1975));
-        catalogoBrani.add(new Track(2, "Hotel California", "Eagles", 390, "Rock", 1976));
-        catalogoBrani.add(new Track(3, "Bad Guy", "Billie Eilish", 194, "Pop", 2019));
-        catalogoBrani.add(new Track(4, "Blinding Lights", "The Weeknd", 200, "Pop", 2019));
-        catalogoBrani.add(new Track(5, "Master of Puppets", "Metallica", 515, "Metal", 1986));
+        catalogoBrani.add(new Track(1, "Bohemian Rhapsody", "Queen", 354, "Rock", 1975, 0));
+        catalogoBrani.add(new Track(2, "Hotel California", "Eagles", 390, "Rock", 1976, 0));
+        catalogoBrani.add(new Track(3, "Bad Guy", "Billie Eilish", 194, "Pop", 2019, 0));
+        catalogoBrani.add(new Track(4, "Blinding Lights", "The Weeknd", 200, "Pop", 2019, 0));
+        catalogoBrani.add(new Track(5, "Master of Puppets", "Metallica", 515, "Metal", 1986, 0));
     }
 
     /**

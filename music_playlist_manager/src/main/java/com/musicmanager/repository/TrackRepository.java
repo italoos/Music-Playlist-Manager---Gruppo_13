@@ -15,9 +15,16 @@ public interface TrackRepository {
 
     /**
      * Recupera tutti i brani presenti nel sistema di persistenza.
+     * @return Una lista contenente tutti i brani salvati dal sistema.
      */
 
     List<Track> findAll();
+
+    /**
+     * Recupera i brani ordinandoli per numero di riproduzioni.
+     * @return La lista dei brani più ascoltati
+     */
+    List<Track> findAllByPlayCount();
 
     /**
      * Inserisce un nuovo brano nel sistema di persistenza.

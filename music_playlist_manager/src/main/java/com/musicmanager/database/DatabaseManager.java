@@ -84,7 +84,8 @@ public class DatabaseManager {
                         "author VARCHAR(255) NOT NULL, " +
                         "length INT NOT NULL, " +
                         "genre VARCHAR(100), " +
-                        "\"year\" INT" +
+                        "\"year\" INT, " +
+                        "playCount INT" +
                         ");";
 
         String playlists =

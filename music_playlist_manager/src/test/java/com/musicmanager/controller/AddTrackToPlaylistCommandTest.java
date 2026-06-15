@@ -96,7 +96,7 @@ class AddTrackToPlaylistCommandTest {
 
         repository = new InMemoryPlaylistRepository();
         playlist = new Playlist(1, "Preferiti");
-        track = new Track(1, "Bad Guy", "Billie Eilish", 194, "Pop", 2019);
+        track = new Track(1, "Bad Guy", "Billie Eilish", 194, "Pop", 2019, 0);
 
         repository.save(playlist);
 

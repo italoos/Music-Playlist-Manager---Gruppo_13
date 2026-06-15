@@ -25,7 +25,7 @@ public class TrackRepositoryImpl implements TrackRepository {
     @Override
     public List<Track> findAll() {
 
-        String sql = "SELECT id, title, author, length, genre, \"year\" FROM Tracks ORDER BY id;";
+        String sql = "SELECT id, title, author, length, genre, \"year\", playCount FROM Tracks ORDER BY id;";
         List<Track> tracks = new ArrayList<>();
 
         try {
@@ -40,7 +40,8 @@ public class TrackRepositoryImpl implements TrackRepository {
                             rs.getString("author"),
                             rs.getInt("length"),
                             rs.getString("genre"),
-                            rs.getInt("year")
+                            rs.getInt("year"),
+                            rs.getInt("playCount")                            
                     ));
                 }
 
@@ -52,6 +53,42 @@ public class TrackRepositoryImpl implements TrackRepository {
 
         return tracks;
 
+    }
+
+    /**
+     * Recupera tutti i brani musicali presenti nella tabella "Tracks" ordinandoli per numero di riproduzione.
+     * @return Una lista di oggetti Track rappresentanti tutti i brani musicali presenti nella tabella "Tracks". Se si verifica un errore durante la lettura, viene restituita una lista vuota.
+     */
+    @Override
+    public List<Track> findAllByPlayCount() {
+
+        String sql = "SELECT id, title, author, length, genre, \"year\", playCount FROM Tracks ORDER BY playCount LIMIT 10;";
+        List<Track> tracks = new ArrayList<>();
+
+        try {
+            Connection conn = DatabaseManager.getInstance().getConnection();
+            try (PreparedStatement pstmt = conn.prepareStatement(sql);
+                    ResultSet rs = pstmt.executeQuery()) {
+
+                while (rs.next()) {
+                    tracks.add(new Track(
+                            rs.getInt("id"),
+                            rs.getString("title"),
+                            rs.getString("author"),
+                            rs.getInt("length"),
+                            rs.getString("genre"),
+                            rs.getInt("year"),
+                            rs.getInt("playCount")                            
+                    ));
+                }
+
+                System.out.println("[H2 DATABASE] INFO: Tracks loaded successfully (" + tracks.size() + ").");
+            }
+        } catch (SQLException e) {
+            System.err.println("[H2 DATABASE] ERROR: Tracks loading failed: " + e.getMessage());
+        }
+
+        return tracks;
     }
 
     /**
@@ -115,7 +152,7 @@ public class TrackRepositoryImpl implements TrackRepository {
     @Override
     public void update(Track track) {
 
-        String sql = "UPDATE Tracks SET title = ?, author = ?, length = ?, genre = ?, \"year\" = ? WHERE id = ?;";
+        String sql = "UPDATE Tracks SET title = ?, author = ?, length = ?, genre = ?, \"year\" = ?, playCount = ? WHERE id = ?;";
 
         try {
             Connection conn = DatabaseManager.getInstance().getConnection();
@@ -125,7 +162,8 @@ public class TrackRepositoryImpl implements TrackRepository {
                 pstmt.setInt(3, track.getLength());
                 pstmt.setString(4, track.getGenre());
                 pstmt.setInt(5, track.getYear());
-                pstmt.setInt(6, track.getId());
+                pstmt.setInt(6, track.getPlayCount());
+                pstmt.setInt(7, track.getId());
                 pstmt.executeUpdate();
                 System.out.println("[H2 DATABASE] INFO: Track updated successfully (ID: " + track.getId() + ").");
             }
