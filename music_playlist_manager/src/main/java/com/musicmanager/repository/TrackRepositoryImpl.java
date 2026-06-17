@@ -62,7 +62,7 @@ public class TrackRepositoryImpl implements TrackRepository {
     @Override
     public List<Track> findAllByPlayCount() {
 
-        String sql = "SELECT id, title, author, length, genre, \"year\", playCount FROM Tracks ORDER BY playCount LIMIT 10;";
+        String sql = "SELECT id, title, author, length, genre, \"year\", playCount FROM Tracks ORDER BY playCount DESC, id ASC LIMIT 10;";
         List<Track> tracks = new ArrayList<>();
 
         try {
@@ -105,9 +105,9 @@ public class TrackRepositoryImpl implements TrackRepository {
         boolean useExplicitId = track.getId() > 0;
 
         if (useExplicitId) {
-            sql = "INSERT INTO Tracks (id, title, author, length, genre, \"year\") VALUES (?, ?, ?, ?, ?, ?);";
+            sql = "INSERT INTO Tracks (id, title, author, length, genre, \"year\", playCount) VALUES (?, ?, ?, ?, ?, ?, ?);";
         } else {
-            sql = "INSERT INTO Tracks (title, author, length, genre, \"year\") VALUES (?, ?, ?, ?, ?);";
+            sql = "INSERT INTO Tracks (title, author, length, genre, \"year\", playCount) VALUES (?, ?, ?, ?, ?, ?);";
         }
 
         try {
@@ -124,6 +124,7 @@ public class TrackRepositoryImpl implements TrackRepository {
                 pstmt.setInt(parameterIndex++, track.getLength());
                 pstmt.setString(parameterIndex++, track.getGenre());
                 pstmt.setInt(parameterIndex++, track.getYear());
+                pstmt.setInt(parameterIndex++, track.getPlayCount());
 
                 pstmt.executeUpdate();
 

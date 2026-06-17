@@ -76,6 +76,10 @@ public class Track {
         return playCount;
     }
 
+    public void setPlayCount(int playCount) {
+        this.playCount = playCount;
+    }
+
     public void incrementPlayCount(){
         this.playCount ++;
     }

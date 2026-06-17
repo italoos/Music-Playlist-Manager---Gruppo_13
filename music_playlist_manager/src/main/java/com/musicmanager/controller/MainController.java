@@ -49,6 +49,7 @@ public class MainController implements PlaybackObserver {
     private final PlaybackEngine playbackEngine;
     private final PlaylistRepository playlistRepository;
     private final Map<Integer, Integer> displayedPlayCounts = new HashMap<>();
+    private final Map<Integer, Integer> displayedPlaylistPlayCounts = new HashMap<>();
 
     private final ObservableList<Track> tracks = FXCollections.observableArrayList();
     private final ObservableList<Playlist> playlists = FXCollections.observableArrayList();
@@ -86,6 +87,7 @@ public class MainController implements PlaybackObserver {
         this.playlistRepository = playlistRepository;
         this.playbackEngine = playbackEngine;
         this.playbackEngine.setTrackRepository(trackRepository);
+        this.playbackEngine.setPlaylistRepository(playlistRepository);
     }
 
     @FXML
@@ -123,16 +125,24 @@ public class MainController implements PlaybackObserver {
 
     @Override
     public void update(Track currentTrack, Playlist currentPlaylist, int currentTime, boolean isPlaying) {
-        if (currentTrack == null) {
-            return;
+        boolean playCountChanged = syncDisplayedPlaylistPlayCount(currentPlaylist);
+
+        if (currentTrack != null) {
+            if (isPlaying) {
+                syncTrackPlayCount(currentTrack);
+            }
+
+            Integer displayedPlayCount = displayedPlayCounts.put(
+                currentTrack.getId(),
+                currentTrack.getPlayCount()
+            );
+
+            playCountChanged = playCountChanged
+                || displayedPlayCount == null
+                || displayedPlayCount.intValue() != currentTrack.getPlayCount();
         }
 
-        Integer displayedPlayCount = displayedPlayCounts.put(
-            currentTrack.getId(),
-            currentTrack.getPlayCount()
-        );
-
-        if (displayedPlayCount != null && displayedPlayCount == currentTrack.getPlayCount()) {
+        if (!playCountChanged) {
             return;
         }
 
@@ -145,6 +155,35 @@ public class MainController implements PlaybackObserver {
         }
 
         refreshMostPlayedLists();
+    }
+
+    private boolean syncDisplayedPlaylistPlayCount(Playlist currentPlaylist) {
+        if (currentPlaylist == null || currentPlaylist.getId() <= 0) {
+            return false;
+        }
+
+        playlists.stream()
+            .filter(playlist -> playlist.getId() == currentPlaylist.getId())
+            .forEach(playlist -> playlist.setPlayCount(currentPlaylist.getPlayCount()));
+
+        Integer displayedPlayCount = displayedPlaylistPlayCounts.put(
+            currentPlaylist.getId(),
+            currentPlaylist.getPlayCount()
+        );
+
+        return displayedPlayCount == null
+            || displayedPlayCount.intValue() != currentPlaylist.getPlayCount();
+    }
+
+    private void syncTrackPlayCount(Track currentTrack) {
+        tracks.stream()
+            .filter(track -> track.getId() == currentTrack.getId())
+            .forEach(track -> track.setPlayCount(currentTrack.getPlayCount()));
+
+        playlists.stream()
+            .flatMap(playlist -> playlist.getTracks().stream())
+            .filter(track -> track.getId() == currentTrack.getId())
+            .forEach(track -> track.setPlayCount(currentTrack.getPlayCount()));
     }
 
     private void initializeMostPlayedLists() {
@@ -189,12 +228,36 @@ public class MainController implements PlaybackObserver {
 
         mostPlayedPlaylistsListView.setPlaceholder(new Label("Nessuna playlist disponibile"));
         mostPlayedPlaylistsListView.setCellFactory(listView -> new ListCell<Playlist>() {
+
+            private final Label playlistLabel = new Label();
+            private final Region spacer = new Region();
+            private final Button playButton = new Button("\u25B6");
+            private final HBox content = new HBox(16, playlistLabel, spacer, playButton);
+
+            {
+                HBox.setHgrow(spacer, Priority.ALWAYS);
+                playlistLabel.setMaxWidth(Double.MAX_VALUE);
+                playButton.visibleProperty().bind(hoverProperty());
+                playButton.managedProperty().bind(playButton.visibleProperty());
+                playButton.setOnAction(event -> handlePlayPlaylist(getItem()));
+            }
+
             @Override
             protected void updateItem(Playlist playlist, boolean empty) {
                 super.updateItem(playlist, empty);
-                setText(empty || playlist == null
-                    ? null
-                    : playlist.getName() + "   [" + getPlaylistPlayCount(playlist) + "]");
+
+                if (empty || playlist == null) {
+                    setText(null);
+                    setGraphic(null);
+                    return;
+                }
+
+                String playCountText = getPlaylistPlayCount(playlist) == 1 ? " ascolto" : " ascolti";
+                playlistLabel.setText(
+                    playlist.getName() + "   [" + getPlaylistPlayCount(playlist) + playCountText + "]"
+                );
+                setText(null);
+                setGraphic(content);
             }
         });
 
@@ -208,27 +271,23 @@ public class MainController implements PlaybackObserver {
 
         mostPlayedTracksListView.getItems().setAll(
             tracks.stream()
-                .sorted(Comparator.comparingInt(Track::getPlayCount).reversed())
+                .sorted(Comparator.<Track>comparingInt(Track::getPlayCount).reversed()
+                    .thenComparingInt(Track::getId))
                 .limit(10)
                 .toList()
         );
 
         mostPlayedPlaylistsListView.getItems().setAll(
             playlists.stream()
-                .sorted(Comparator.comparingInt(this::getPlaylistPlayCount).reversed())
+                .sorted(Comparator.<Playlist>comparingInt(this::getPlaylistPlayCount).reversed()
+                    .thenComparingInt(Playlist::getId))
                 .limit(10)
                 .toList()
         );
     }
 
     private int getPlaylistPlayCount(Playlist playlist) {
-        return playlist.getTracks().stream()
-            .mapToInt(playlistTrack -> tracks.stream()
-                .filter(track -> track.getId() == playlistTrack.getId())
-                .mapToInt(Track::getPlayCount)
-                .findFirst()
-                .orElse(playlistTrack.getPlayCount()))
-            .sum();
+        return playlist.getPlayCount();
     }
 
     /**
@@ -540,6 +599,7 @@ public class MainController implements PlaybackObserver {
         track.setLength(updatedTrack.getLength());
         track.setGenre(updatedTrack.getGenre());
         track.setYear(updatedTrack.getYear());
+        track.setPlayCount(updatedTrack.getPlayCount());
 
         int index = tracks.indexOf(track);
 
@@ -951,6 +1011,11 @@ public class MainController implements PlaybackObserver {
 
         selectedPlaylist = playlist;
         playbackEngine.startPlaylist(selectedPlaylist);
+        syncDisplayedPlaylistPlayCount(selectedPlaylist);
+        if (playlistListView != null) {
+            playlistListView.refresh();
+        }
+        refreshMostPlayedLists();
 
         System.out.println("[MAIN CONTROLLER] INFO: Play requested for playlist: " + playlist.getName() + ".");
     }
@@ -994,6 +1059,7 @@ public class MainController implements PlaybackObserver {
             playlistRepository.delete(target.getId());
             playlistListView.getItems().remove(target);
             playlistListView.refresh();
+            refreshMostPlayedLists();
             playbackEngine.setCurrentTrack(null);
             playbackEngine.setCurrentPlaylist(null);
         }
@@ -1038,6 +1104,7 @@ public class MainController implements PlaybackObserver {
             playlistRepository.update(playlist);
 
             playlistListView.refresh();
+            refreshMostPlayedLists();
         });
     }
 
