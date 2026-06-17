@@ -277,6 +277,7 @@ public class PlaybackEngine {
             notifyObservers();
             return;
         }
+
     
         int currentIndex = currentPlaylist.indexOf(currentTrack);
     
@@ -289,9 +290,20 @@ public class PlaybackEngine {
             notifyObservers();
             return;
         }
-    
+
+        // incremento playCount quando ricomincia la playlist
+        if (strategy instanceof PlaylistLoopStrategy || ( strategy instanceof TrackLoopStrategy && currentPlaylist.getTracks().size() == 1 )) {
+            if (currentPlaylist.indexOf(nextTrack) == 0) {
+                currentPlaylist.incrementPlayCount();
+                if (playlistRepository != null && currentPlaylist.getId() > 0) {
+                    playlistRepository.update(currentPlaylist);
+                }
+            }
+        }
+        
         setCurrentTrack(nextTrack);
         play();
+
 
     }
 
