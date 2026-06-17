@@ -19,6 +19,12 @@ public class RemoveTrackFromPlaylistCommand implements Command {
 
     private boolean wasPlayingInThisPlaylist = false;
 
+    /**
+     * Crea il comando per rimuovere una traccia da una playlist.
+     * @param playlist Playlist da modificare.
+     * @param track Traccia da rimuovere.
+     * @param playlistRepository Repository usato per salvare la modifica.
+     */
     public RemoveTrackFromPlaylistCommand(Playlist playlist, Track track, PlaylistRepository playlistRepository) {
         this.playlist = playlist;
         this.track = track;

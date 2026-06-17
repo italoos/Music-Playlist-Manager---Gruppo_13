@@ -22,7 +22,7 @@ public class PlaylistRepositoryImpl implements PlaylistRepository {
     /**
      * Salva una nuova playlist nel database, inserendo prima il record della playlist 
      * e successivamente tutte le relazioni con le sue tracce musicali.
-     * * @param playlist L'oggetto Playlist da salvare nel database.
+     * @param playlist L'oggetto Playlist da salvare nel database.
      */
     @Override
     public void save(Playlist playlist) {
@@ -92,7 +92,8 @@ public class PlaylistRepositoryImpl implements PlaylistRepository {
         }
     }
 
-     @Override
+    /** {@inheritDoc} */
+    @Override
     public void update(Playlist playlist) {
 
         String updatePlaylist =
@@ -162,7 +163,7 @@ public class PlaylistRepositoryImpl implements PlaylistRepository {
     /**
      * Elimina definitivamente una playlist dal database rimuovendo prima i vincoli 
      * di chiave esterna (relazioni brani) e poi il record principale.
-     * * @param playlistId L'ID della playlist da eliminare.
+     * @param playlistId L'ID della playlist da eliminare.
      */
     @Override
     public void delete(int playlistId) {
@@ -209,7 +210,7 @@ public class PlaylistRepositoryImpl implements PlaylistRepository {
 
     /**
      * Ricerca una specifica playlist tramite il suo ID e carica l'oggetto completo di tutte le sue tracce.
-     * * @param playlistId L'ID della playlist da cercare.
+     * @param playlistId L'ID della playlist da cercare.
      * @return L'oggetto Playlist popolato con i suoi brani, oppure null se non viene trovata.
      */
     @Override
@@ -270,7 +271,7 @@ public class PlaylistRepositoryImpl implements PlaylistRepository {
 
     /**
      * Recupera tutte le playlist memorizzate nel sistema, incluse le tracce associate a ciascuna di esse.
-     * * @return Una lista contenente tutte le Playlist caricate dal database.
+     * @return Una lista contenente tutte le Playlist caricate dal database.
      */
     @Override
     public List<Playlist> findAll() {
@@ -334,7 +335,7 @@ public class PlaylistRepositoryImpl implements PlaylistRepository {
 
     /**
      * Recupera tutte le playlist memorizzate nel sistema, incluse le tracce associate a ciascuna di esse.
-     * * @return Una lista contenente tutte le Playlist caricate dal database.
+     * @return Una lista contenente le Playlist piu ascoltate caricate dal database.
      */
     @Override
     public List<Playlist> findAllByPlayCount() {

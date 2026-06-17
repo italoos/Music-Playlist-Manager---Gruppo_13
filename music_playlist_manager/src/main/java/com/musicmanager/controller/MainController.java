@@ -47,6 +47,12 @@ import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.scene.control.Separator;
 
+/**
+ * Controller principale della schermata JavaFX.
+ *
+ * Coordina gli eventi della UI, aggiorna le liste osservabili, invoca i
+ * repository per la persistenza e delega la riproduzione al PlaybackEngine.
+ */
 public class MainController implements PlaybackObserver { 
 
     private final CommandManager commandManager = new CommandManager();
@@ -83,6 +89,9 @@ public class MainController implements PlaybackObserver {
 
     private Playlist selectedPlaylist;
 
+    /**
+     * Crea il controller usando le implementazioni concrete dei repository e il motore di riproduzione singleton.
+     */
     public MainController() {
         this(new TrackRepositoryImpl(),new PlaylistRepositoryImpl(), PlaybackEngine.getInstance());
     }
@@ -122,6 +131,10 @@ public class MainController implements PlaybackObserver {
 
 
 
+    /**
+     * Ricarica il file FXML principale nello stage corrente.
+     * @throws IOException Se il file FXML non puo essere caricato.
+     */
     @FXML
     private void loadPrimaryStage() throws IOException {
         App.setRoot("primary");
@@ -149,6 +162,13 @@ public class MainController implements PlaybackObserver {
         initializeMostPlayedLists();
     }
 
+    /**
+     * Riceve gli aggiornamenti dal motore di riproduzione e mantiene allineate le liste della UI.
+     * @param currentTrack Traccia corrente.
+     * @param currentPlaylist Playlist corrente.
+     * @param currentTime Tempo di riproduzione corrente in secondi.
+     * @param isPlaying true se il player e in riproduzione, false altrimenti.
+     */
     @Override
     public void update(Track currentTrack, Playlist currentPlaylist, int currentTime, boolean isPlaying) {
         boolean playCountChanged = syncDisplayedPlaylistPlayCount(currentPlaylist);
@@ -183,6 +203,11 @@ public class MainController implements PlaybackObserver {
         refreshMostPlayedLists();
     }
 
+    /**
+     * Sincronizza il contatore visualizzato della playlist corrente con quello persistito.
+     * @param currentPlaylist Playlist da sincronizzare.
+     * @return true se il valore visualizzato e cambiato.
+     */
     private boolean syncDisplayedPlaylistPlayCount(Playlist currentPlaylist) {
         if (currentPlaylist == null || currentPlaylist.getId() <= 0) {
             return false;
@@ -201,6 +226,10 @@ public class MainController implements PlaybackObserver {
             || displayedPlayCount.intValue() != currentPlaylist.getPlayCount();
     }
 
+    /**
+     * Sincronizza il contatore di riproduzione della traccia corrente con il repository.
+     * @param currentTrack Traccia da sincronizzare.
+     */
     private void syncTrackPlayCount(Track currentTrack) {
         tracks.stream()
             .filter(track -> track.getId() == currentTrack.getId())
@@ -212,6 +241,9 @@ public class MainController implements PlaybackObserver {
             .forEach(track -> track.setPlayCount(currentTrack.getPlayCount()));
     }
 
+    /**
+     * Inizializza le liste dei brani e delle playlist piu ascoltati.
+     */
     private void initializeMostPlayedLists() {
         tracks.addListener((ListChangeListener<Track>) change -> refreshMostPlayedLists());
         playlists.addListener((ListChangeListener<Playlist>) change -> refreshMostPlayedLists());
@@ -232,6 +264,7 @@ public class MainController implements PlaybackObserver {
                 playButton.setOnAction(event -> playTrack(getItem()));
             }
 
+            /** {@inheritDoc} */
             @Override
             protected void updateItem(Track track, boolean empty) {
                 super.updateItem(track, empty);
@@ -282,6 +315,7 @@ public class MainController implements PlaybackObserver {
                 playButton.setOnAction(event -> handlePlayPlaylist(getItem()));
             }
 
+            /** {@inheritDoc} */
             @Override
             protected void updateItem(Playlist playlist, boolean empty) {
                 super.updateItem(playlist, empty);
@@ -304,6 +338,9 @@ public class MainController implements PlaybackObserver {
         refreshMostPlayedLists();
     }
 
+    /**
+     * Aggiorna le classifiche visualizzate dei brani e delle playlist piu ascoltati.
+     */
     private void refreshMostPlayedLists() {
         if (mostPlayedTracksListView == null || mostPlayedPlaylistsListView == null) {
             return;
@@ -326,10 +363,19 @@ public class MainController implements PlaybackObserver {
         );
     }
 
+    /**
+     * Restituisce il contatore aggiornato di una playlist, consultando il repository quando possibile.
+     * @param playlist Playlist da verificare.
+     * @return Numero di riproduzioni della playlist.
+     */
     private int getPlaylistPlayCount(Playlist playlist) {
         return playlist.getPlayCount();
     }
 
+    /**
+     * Mostra nel pannello dettagli le informazioni della traccia selezionata.
+     * @param track Traccia selezionata, oppure null per svuotare i dettagli.
+     */
     private void showTrackDetails(Track track) {
 
         if (track == null) {
@@ -356,6 +402,9 @@ public class MainController implements PlaybackObserver {
         private final Button editButton = new Button("\u270E"); // Unicode per simbolo edit
         private final HBox content = new HBox(16, trackLabel, spacer, playButton, editButton, deleteButton);
 
+        /**
+         * Crea la cella personalizzata e collega i pulsanti alle azioni sulla traccia.
+         */
         private TrackListCell() {
             HBox.setHgrow(spacer, Priority.ALWAYS);
             trackLabel.setMaxWidth(Double.MAX_VALUE);
@@ -375,6 +424,8 @@ public class MainController implements PlaybackObserver {
          * @param track La traccia da visualizzare.
          * @param empty Indica se l'elemento è vuoto.
          */
+        /** {@inheritDoc} */
+        /** {@inheritDoc} */
         @Override
         protected void updateItem(Track track, boolean empty) {
             super.updateItem(track, empty);
@@ -524,6 +575,9 @@ public class MainController implements PlaybackObserver {
         }
     }
 
+    /**
+     * Cella personalizzata per visualizzare le tracce presenti nella playlist selezionata.
+     */
     private class PlaylistTrackListCell extends ListCell<Track> {
 
         private final Label trackLabel = new Label();
@@ -531,6 +585,9 @@ public class MainController implements PlaybackObserver {
         private final Button removeButton = new Button("- Rimuovi");
         private final HBox content = new HBox(16, trackLabel, spacer, removeButton);
 
+        /**
+         * Crea la cella e collega il pulsante di rimozione alla playlist selezionata.
+         */
         private PlaylistTrackListCell() {
             HBox.setHgrow(spacer, Priority.ALWAYS);
             trackLabel.setMaxWidth(Double.MAX_VALUE);
@@ -547,6 +604,7 @@ public class MainController implements PlaybackObserver {
             });
         }
 
+        /** {@inheritDoc} */
         @Override
         protected void updateItem(Track track, boolean empty) {
             super.updateItem(track, empty);
@@ -726,6 +784,10 @@ public class MainController implements PlaybackObserver {
 
     }
 
+    /**
+     * Propaga le modifiche di una traccia a tutte le copie presenti nelle playlist e nel player.
+     * @param updatedTrack Traccia aggiornata da usare come sorgente dei dati.
+     */
     private void syncTrackCopies(Track updatedTrack) {
         playlists.stream()
             .flatMap(playlist -> playlist.getTracks().stream())
@@ -745,6 +807,11 @@ public class MainController implements PlaybackObserver {
         }
     }
 
+    /**
+     * Copia tutti i campi modificabili da una traccia sorgente a una traccia destinazione.
+     * @param target Traccia da aggiornare.
+     * @param source Traccia da cui leggere i nuovi valori.
+     */
     private void copyTrackData(Track target, Track source) {
         target.setTitle(source.getTitle());
         target.setAuthor(source.getAuthor());
@@ -778,8 +845,11 @@ public class MainController implements PlaybackObserver {
 
     }
 
-    /** Aggiunge un brano musicale a una playlist. */
-
+    /**
+     * Aggiunge un brano musicale a una playlist.
+     * @param track Traccia da aggiungere.
+     * @param playlist Playlist di destinazione.
+     */
     public void handleAddTrackToPlaylist(Track track, Playlist playlist) {
 
         if (track == null || playlist == null) {
@@ -798,6 +868,9 @@ public class MainController implements PlaybackObserver {
 
     }
 
+    /**
+     * Gestisce l'aggiunta dalla vista di dettaglio della playlist selezionata.
+     */
     @FXML
     private void handleDetailedAddTrack() {
 
@@ -822,8 +895,11 @@ public class MainController implements PlaybackObserver {
 
     }
 
-    /** Rimuove un brano musicale da una playlist. */
-
+    /**
+     * Rimuove un brano musicale da una playlist.
+     * @param track Traccia da rimuovere.
+     * @param playlist Playlist da modificare.
+     */
     public void handleRemoveTrackFromPlaylist(Track track, Playlist playlist) {
 
         if (track == null || playlist == null) {
@@ -842,6 +918,10 @@ public class MainController implements PlaybackObserver {
 
     }
 
+    /**
+     * Rimuove una traccia dalla playlist attualmente visualizzata nei dettagli.
+     * @param track Traccia da rimuovere.
+     */
     private void handleRemoveTrackFromSelectedPlaylist(Track track) {
 
         if (selectedPlaylist == null) {
@@ -886,6 +966,11 @@ public class MainController implements PlaybackObserver {
         refreshMostPlayedLists();
     }
 
+    /**
+     * Mostra un alert per operazioni non valide sulle playlist.
+     * @param header Intestazione dell'alert.
+     * @param content Messaggio descrittivo da mostrare all'utente.
+     */
     private void showPlaylistOperationAlert(String header, String content) {
         Alert alert = new Alert(Alert.AlertType.WARNING);
         alert.setTitle("Playlist");
@@ -903,8 +988,7 @@ public class MainController implements PlaybackObserver {
     }
 
     /**
-     * Gestisce la riproduzione di una traccia musicale. Riceve la traccia da riprodurre e la passa al motore di riproduzione.
-     * @param track La traccia da riprodurre. Deve essere una traccia già presente nella lista e nel repository.
+     * Gestisce la riproduzione della traccia selezionata nella lista generale.
      */
     @FXML
     public void handlePlay() {
@@ -1087,6 +1171,7 @@ public class MainController implements PlaybackObserver {
                 });
             }
 
+            /** {@inheritDoc} */
             @Override
             protected void updateItem(Playlist playlist, boolean empty) {
                 super.updateItem(playlist, empty);
@@ -1184,6 +1269,7 @@ public class MainController implements PlaybackObserver {
 
     /**
      * Gestisce la rimozione di una playlist selezionata.
+     * @param playlist Playlist da eliminare; se null viene usata la selezione corrente della lista.
      */
     @FXML
     public void handleDeletePlaylist(Playlist playlist) {
@@ -1322,6 +1408,9 @@ public class MainController implements PlaybackObserver {
         showPlaylistsView();
     }
 
+    /**
+     * Mostra il dialog di generazione automatica e crea una playlist in base al criterio scelto.
+     */
     @FXML
     public void handleGeneratePlaylist() {
         // Se non ci sono brani nel catalogo, non possiamo generare nulla

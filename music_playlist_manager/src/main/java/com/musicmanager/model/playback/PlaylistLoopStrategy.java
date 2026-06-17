@@ -3,6 +3,9 @@ package com.musicmanager.model.playback;
 import java.util.List;
 import com.musicmanager.model.Track;
 
+/**
+ * Strategia che ripete l'intera playlist tornando alla prima traccia dopo l'ultima.
+ */
 public class PlaylistLoopStrategy implements PlaybackStrategy {
 
     /**

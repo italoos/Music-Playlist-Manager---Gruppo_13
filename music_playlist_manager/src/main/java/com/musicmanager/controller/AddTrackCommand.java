@@ -13,6 +13,12 @@ public class AddTrackCommand implements Command {
     private final TrackRepository trackRepository;
     private final ObservableList<Track> tracks;
 
+    /**
+     * Crea il comando per aggiungere una traccia al catalogo.
+     * @param track Traccia da aggiungere.
+     * @param trackRepository Repository usato per salvare la traccia.
+     * @param tracks Lista osservabile mostrata dalla GUI.
+     */
     public AddTrackCommand(Track track, TrackRepository trackRepository, ObservableList<Track> tracks) {
         this.track = track;
         this.trackRepository = trackRepository;

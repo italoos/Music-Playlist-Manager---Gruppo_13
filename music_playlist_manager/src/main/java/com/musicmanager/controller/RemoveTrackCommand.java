@@ -28,6 +28,13 @@ public class RemoveTrackCommand implements Command {
 
     private final List<Integer> affectedPlaylistIndices = new ArrayList<>();
 
+    /**
+     * Crea il comando per rimuovere una traccia dal catalogo generale.
+     * @param track Traccia da rimuovere.
+     * @param trackRepository Repository usato per eliminare o ripristinare la traccia.
+     * @param playlistRepository Repository usato per aggiornare le playlist coinvolte.
+     * @param tracks Lista osservabile mostrata dalla GUI.
+     */
     public RemoveTrackCommand(Track track, TrackRepository trackRepository, PlaylistRepository playlistRepository, ObservableList<Track> tracks) {
         this.track = track;
         this.trackRepository = trackRepository;

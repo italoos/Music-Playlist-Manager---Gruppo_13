@@ -1,5 +1,8 @@
 package com.musicmanager.model.playback;
 
+/**
+ * Stato del player quando una traccia e in riproduzione.
+ */
 public class PlayingState implements PlayerState {
 
     /**

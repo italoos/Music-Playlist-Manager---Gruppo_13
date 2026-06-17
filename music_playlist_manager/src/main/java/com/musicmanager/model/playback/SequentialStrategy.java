@@ -3,6 +3,9 @@ package com.musicmanager.model.playback;
 import java.util.List;
 import com.musicmanager.model.Track;
 
+/**
+ * Strategia che riproduce le tracce nell'ordine in cui compaiono nella playlist.
+ */
 public class SequentialStrategy implements PlaybackStrategy{
 
     /**

@@ -20,6 +20,12 @@ import javafx.scene.control.ProgressBar;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Priority;
 
+/**
+ * Barra grafica JavaFX dedicata ai controlli di riproduzione.
+ *
+ * Espone pulsanti per play, skip e cambio strategia, mostrando anche
+ * traccia corrente, tempo e avanzamento.
+ */
 public class MediaPlayerUI extends HBox implements PlaybackObserver {
 
     private MainController controller;
@@ -37,6 +43,9 @@ public class MediaPlayerUI extends HBox implements PlaybackObserver {
     private double displayedProgress = 0;
     private double targetProgress = 0;
 
+    /**
+     * Crea e inizializza la barra del player.
+     */
     public MediaPlayerUI() {
         initComponents();
         initActions();
@@ -111,7 +120,9 @@ public class MediaPlayerUI extends HBox implements PlaybackObserver {
         controller.handleSkip();
     }
 
-
+    /**
+     * Gestisce la selezione della riproduzione sequenziale.
+     */
     private void handleSequentialAction(){
         if(controller == null){
             return;
@@ -234,6 +245,7 @@ public class MediaPlayerUI extends HBox implements PlaybackObserver {
     private void initSmoothAnimation() {
         AnimationTimer timer = new AnimationTimer() {
 
+            /** {@inheritDoc} */
             @Override
             public void handle(long now) {
                 displayedProgress += (targetProgress - displayedProgress) * 0.12;

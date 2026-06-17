@@ -28,18 +28,21 @@ public interface TrackRepository {
 
     /**
      * Inserisce un nuovo brano nel sistema di persistenza.
+     * @param track Il brano da salvare.
      */
 
     void save(Track track);
 
     /**
      * Aggiorna i dati di un brano già presente nel sistema di persistenza.
+     * @param track Il brano con i dati aggiornati.
      */
 
     void update(Track track);
 
     /**
      * Elimina un brano dal sistema di persistenza.
+     * @param id Identificativo del brano da eliminare.
      */
 
     void delete(int id);

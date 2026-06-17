@@ -1,5 +1,8 @@
 package com.musicmanager.model.playback;
 
+/**
+ * Stato operativo del player nel pattern State.
+ */
 public interface PlayerState {
 
     /**

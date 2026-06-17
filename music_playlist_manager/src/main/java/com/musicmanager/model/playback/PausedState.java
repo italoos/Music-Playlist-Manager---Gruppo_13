@@ -1,5 +1,8 @@
 package com.musicmanager.model.playback;
 
+/**
+ * Stato del player quando la riproduzione e ferma o in pausa.
+ */
 public class PausedState implements PlayerState {
 
     /**

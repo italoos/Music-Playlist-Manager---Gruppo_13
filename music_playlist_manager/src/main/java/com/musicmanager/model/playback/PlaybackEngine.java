@@ -10,6 +10,12 @@ import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.util.Duration;
 
+/**
+ * Motore centrale della riproduzione musicale.
+ *
+ * Coordina traccia corrente, playlist corrente, stato del player,
+ * strategia di avanzamento e notifica degli osservatori della UI.
+ */
 public class PlaybackEngine {
 
     private static PlaybackEngine instance;
@@ -180,6 +186,10 @@ public class PlaybackEngine {
         notifyObservers();
     }
 
+    /**
+     * Restituisce la playlist attualmente in riproduzione.
+     * @return La playlist corrente, oppure null se non e attiva alcuna playlist.
+     */
     public Playlist getCurrentPlaylist() {
         return this.currentPlaylist;
     }
@@ -213,6 +223,10 @@ public class PlaybackEngine {
         play();
     }
 
+    /**
+     * Avvia una playlist scegliendo automaticamente la prima traccia tramite la strategia corrente.
+     * @param playlist La playlist da riprodurre.
+     */
     public void startPlaylist(Playlist playlist) {
         startPlaylist(playlist, null);
     }
@@ -241,10 +255,18 @@ public class PlaybackEngine {
         this.strategy = strategy;
     }
 
+    /**
+     * Imposta il repository usato per aggiornare il contatore di riproduzione delle tracce.
+     * @param trackRepository Repository delle tracce.
+     */
     public void setTrackRepository(TrackRepository trackRepository) {
         this.trackRepository = trackRepository;
     }
 
+    /**
+     * Imposta il repository usato per aggiornare il contatore di riproduzione delle playlist.
+     * @param playlistRepository Repository delle playlist.
+     */
     public void setPlaylistRepository(PlaylistRepository playlistRepository) {
         this.playlistRepository = playlistRepository;
     }
@@ -307,8 +329,10 @@ public class PlaybackEngine {
 
     }
 
-    /** Sincronizza le modifiche della playlist corrente con la UI. */
-
+    /**
+     * Sincronizza le modifiche della playlist corrente con la UI.
+     * @param playlist Playlist aggiornata dal controller o da un comando.
+     */
     public void handlePlaylistModification(Playlist playlist) {
         if (this.currentPlaylist != null && this.currentPlaylist.getId() == playlist.getId()) {
             this.currentPlaylist = playlist;
