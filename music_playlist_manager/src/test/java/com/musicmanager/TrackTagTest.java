@@ -15,7 +15,7 @@ class TrackTagTest {
     @Test
     void shouldAddFavouriteTag() {
 
-        Track track = new Track(1, "Song", "Artist", 180, "Pop", 2024);
+        Track track = new Track(1, "Song", "Artist", 180, "Pop", 2024, 0);
 
         track.addTag(Tag.FAVOURITE);
 
@@ -28,7 +28,7 @@ class TrackTagTest {
     @Test
     void shouldAddExplicitTag() {
 
-        Track track = new Track(1, "Song", "Artist", 180, "Pop", 2024);
+        Track track = new Track(1, "Song", "Artist", 180, "Pop", 2024, 0);
 
         track.addTag(Tag.EXPLICIT);
 
@@ -41,7 +41,7 @@ class TrackTagTest {
     @Test
     void shouldAddNewReleaseTag() {
 
-        Track track = new Track(1, "Song", "Artist", 180, "Pop", 2024);
+        Track track = new Track(1, "Song", "Artist", 180, "Pop", 2024, 0);
 
         track.addTag(Tag.NEW_RELEASE);
 
@@ -54,7 +54,7 @@ class TrackTagTest {
     @Test
     void shouldContainMultipleTags() {
 
-        Track track = new Track(1, "Song", "Artist", 180, "Pop", 2024);
+        Track track = new Track(1, "Song", "Artist", 180, "Pop", 2024, 0);
 
         track.addTag(Tag.FAVOURITE);
         track.addTag(Tag.EXPLICIT);

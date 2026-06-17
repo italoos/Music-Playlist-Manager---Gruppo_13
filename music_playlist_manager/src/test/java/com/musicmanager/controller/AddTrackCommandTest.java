@@ -33,6 +33,11 @@ class AddTrackCommandTest {
         }
 
         @Override
+        public List<Track> findAllByPlayCount() {
+            return new ArrayList<>(storage);
+        }
+
+        @Override
         public void save(Track track) {
             if (!storage.contains(track)) {
                 storage.add(track);
@@ -81,7 +86,7 @@ class AddTrackCommandTest {
     void setUp() {
         repository = new InMemoryTrackRepository();
         trackList = FXCollections.observableArrayList();
-        track = new Track(1, "Bad Guy", "Billie Eilish", 194, "Pop", 2019);
+        track = new Track(1, "Bad Guy", "Billie Eilish", 194, "Pop", 2019, 0);
     }
 
     /** Verifica che l'aggiunta di una traccia aggiorni il catalogo delle tracce e il repository. */

@@ -50,7 +50,7 @@ class SequentialStrategyTest {
 
         for (int i = 0; i < count; i++) {
             int id = firstId + i;
-            tracks.add(new Track(id,"Track " + id,"Artist",180,"Genre",2020));
+            tracks.add(new Track(id,"Track " + id,"Artist",180,"Genre",2020, 0));
         }
 
         return tracks;

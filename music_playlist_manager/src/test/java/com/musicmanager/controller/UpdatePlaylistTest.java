@@ -57,6 +57,11 @@ class UpdatePlaylistTest {
         public List<Playlist> findAll() {
             return new ArrayList<>(storage);
         }
+
+        @Override
+        public List<Playlist> findAllByPlayCount() {
+            return new ArrayList<>(storage);
+        }
     }
 
     private InMemoryPlaylistRepository repository;
@@ -81,7 +86,7 @@ class UpdatePlaylistTest {
     @BeforeEach
     void setUp() {
         repository = new InMemoryPlaylistRepository();
-        playlist = new Playlist(1, "Preferiti");
+        playlist = new Playlist(1, "Preferiti", 0);
         repository.save(playlist); // La playlist iniziale è registrata nel database simulato
     }
 

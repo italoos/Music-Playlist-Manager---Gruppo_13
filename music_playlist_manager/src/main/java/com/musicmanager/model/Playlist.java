@@ -16,10 +16,10 @@ public class Playlist {
         this.tracks = new ArrayList<>();
     }
 
-    public Playlist(int id, String name) {
+    public Playlist(int id, String name, int playCount) {
         this.id = id;
         this.name = name;
-        this.playCount = 0;
+        this.playCount = playCount;
         this.tracks = new ArrayList<>();
     }
 
@@ -55,5 +55,17 @@ public class Playlist {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public int getPlayCount() {
+        return this.playCount;
+    }
+
+    public void setPlayCount(int playCount) {
+        this.playCount = playCount;
+    }
+
+    public void incrementPlayCount() {
+        this.playCount++;
     }
 }

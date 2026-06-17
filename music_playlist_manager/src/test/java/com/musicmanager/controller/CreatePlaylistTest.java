@@ -54,6 +54,11 @@ class CreatePlaylistTest {
         public List<Playlist> findAll() {
             return new ArrayList<>(storage);
         }
+
+        @Override
+        public List<Playlist> findAllByPlayCount() {
+            return new ArrayList<>(storage);
+        }
     }
 
     private InMemoryPlaylistRepository repository;
@@ -83,7 +88,7 @@ class CreatePlaylistTest {
     /** Verifica che il salvataggio di una playlist inserisca correttamente l'oggetto nel repository. */
     @Test
     void saveAddsPlaylistToRepositoryCorrectly() {
-        playlist = new Playlist(2, "Rock Classics");
+        playlist = new Playlist(2, "Rock Classics", 0);
 
         repository.save(playlist);
 

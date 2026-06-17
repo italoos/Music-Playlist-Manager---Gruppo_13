@@ -15,8 +15,9 @@ public class Track {
     private String genre;
     private int year;
     private Set<Tag> tags;
+    private int playCount;
 
-    public Track(int id, String title, String author, int length, String genre, int year) {
+    public Track(int id, String title, String author, int length, String genre, int year, int playCount) {
         this.id = id;
         this.title = title;
         this.author = author;
@@ -24,6 +25,7 @@ public class Track {
         this.genre = genre;
         this.year = year;
         this.tags = new HashSet<>();
+        this.playCount = playCount;
     }
 
     public int getId() {
@@ -79,6 +81,18 @@ public class Track {
         this.tags = new HashSet<>(tags);
     }
 
+    public int getPlayCount() {
+        return playCount;
+    }
+
+    public void setPlayCount(int playCount) {
+        this.playCount = playCount;
+    }
+
+    public void incrementPlayCount(){
+        this.playCount ++;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -108,34 +122,34 @@ public class Track {
         return tags;
     }
 
-/**
- *Converte l'insieme dei tag in una stringa da salvare nel database.
- * Ad esempio:
- * FAVOURITE,EXPLICIT, NEW_RELEASE
-*/
-public String serializeTags() {
-    return tags.stream()
-               .map(Tag::name)
-               .collect(Collectors.joining(","));
-}
-
-/**
- * Ricostruisce l'insieme dei tag a partire dalla stringa letta dal database.
- * Ad esempio:
- * FAVOURITE,EXPLICIT, NEW_RELEASE
- */
-public void deserializeTags(String serializedTags) {
-
-    tags.clear();
-
-    if (serializedTags == null || serializedTags.isBlank()) {
-        return;
+    /**
+     *Converte l'insieme dei tag in una stringa da salvare nel database.
+    * Ad esempio:
+    * FAVOURITE,EXPLICIT, NEW_RELEASE
+    */
+    public String serializeTags() {
+        return tags.stream()
+                .map(Tag::name)
+                .collect(Collectors.joining(","));
     }
 
-    Arrays.stream(serializedTags.split(","))
-          .map(String::trim)
-          .map(Tag::valueOf)
-          .forEach(tags::add);
+    /**
+     * Ricostruisce l'insieme dei tag a partire dalla stringa letta dal database.
+     * Ad esempio:
+     * FAVOURITE,EXPLICIT, NEW_RELEASE
+     */
+    public void deserializeTags(String serializedTags) {
+
+        tags.clear();
+
+        if (serializedTags == null || serializedTags.isBlank()) {
+            return;
+        }
+
+        Arrays.stream(serializedTags.split(","))
+            .map(String::trim)
+            .map(Tag::valueOf)
+            .forEach(tags::add);
+    }
 }
 
-}

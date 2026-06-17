@@ -4,6 +4,8 @@ import java.util.List;
 
 import com.musicmanager.model.Playlist;
 import com.musicmanager.model.Track;
+import com.musicmanager.repository.PlaylistRepository;
+import com.musicmanager.repository.TrackRepository;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.util.Duration;
@@ -20,6 +22,9 @@ public class PlaybackEngine {
     private Timeline timeline;
     private PlayerState currentState;
     private PlaybackStrategy strategy;
+    private TrackRepository trackRepository;
+    private PlaylistRepository playlistRepository;
+    private boolean trackNeedsPlayCountIncrement;
     
 
     /**
@@ -125,7 +130,29 @@ public class PlaybackEngine {
      * Inizia la riproduzione della traccia corrente.
      */
     public void play() {
+        if (currentTrack == null) {
+            return;
+        }
+
+        boolean wasPlaying = isPlaying();
+        boolean playCountIncremented = false;
+
+        if (trackNeedsPlayCountIncrement) {
+            currentTrack.incrementPlayCount();
+            if (trackRepository != null) {
+                trackRepository.update(currentTrack);
+            }
+            trackNeedsPlayCountIncrement = false;
+            playCountIncremented = true;
+        }
+
         currentState.play(this);
+
+        // PausedState notifica gia' il cambio di stato. PlayingState invece non
+        // notifica, quindi serve un aggiornamento esplicito per il nuovo conteggio.
+        if (playCountIncremented && wasPlaying) {
+            notifyObservers();
+        }
     }
 
     /**
@@ -149,6 +176,7 @@ public class PlaybackEngine {
     public void setCurrentTrack(Track currentTrack) {
         this.currentTrack = currentTrack;
         this.currentTime = 0;
+        this.trackNeedsPlayCountIncrement = currentTrack != null;
         notifyObservers();
     }
 
@@ -176,6 +204,10 @@ public class PlaybackEngine {
         }
 
         currentPlaylist = playlist;
+        currentPlaylist.incrementPlayCount();
+        if (playlistRepository != null && currentPlaylist.getId() > 0) {
+            playlistRepository.update(currentPlaylist);
+        }
         Track firstTrack = strategy.getFirst(playlist.getTracks(), preferredTrack);
         setCurrentTrack(firstTrack);
         play();
@@ -209,6 +241,14 @@ public class PlaybackEngine {
         this.strategy = strategy;
     }
 
+    public void setTrackRepository(TrackRepository trackRepository) {
+        this.trackRepository = trackRepository;
+    }
+
+    public void setPlaylistRepository(PlaylistRepository playlistRepository) {
+        this.playlistRepository = playlistRepository;
+    }
+
     /**
      * Restituisce true se la traccia è attualmente in riproduzione, false altrimenti.
      * @return true se la traccia è attualmente in riproduzione, false altrimenti.
@@ -237,6 +277,7 @@ public class PlaybackEngine {
             notifyObservers();
             return;
         }
+
     
         int currentIndex = currentPlaylist.indexOf(currentTrack);
     
@@ -249,9 +290,20 @@ public class PlaybackEngine {
             notifyObservers();
             return;
         }
-    
+
+        // incremento playCount quando ricomincia la playlist
+        if (strategy instanceof PlaylistLoopStrategy || ( strategy instanceof TrackLoopStrategy && currentPlaylist.getTracks().size() == 1 )) {
+            if (currentPlaylist.indexOf(nextTrack) == 0) {
+                currentPlaylist.incrementPlayCount();
+                if (playlistRepository != null && currentPlaylist.getId() > 0) {
+                    playlistRepository.update(currentPlaylist);
+                }
+            }
+        }
+        
         setCurrentTrack(nextTrack);
         play();
+
 
     }
 

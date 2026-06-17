@@ -2,10 +2,14 @@ package com.musicmanager.controller;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import com.musicmanager.MediaPlayerUI;
 import com.musicmanager.PlaybackEngine;
+import com.musicmanager.PlaybackObserver;
 import com.musicmanager.PlaybackStrategy;
 import com.musicmanager.PlaylistGenerator;
 import com.musicmanager.PlaylistGeneratorFactory;
@@ -18,6 +22,7 @@ import com.musicmanager.repository.TrackRepository;
 import com.musicmanager.repository.TrackRepositoryImpl;
 
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
@@ -41,12 +46,14 @@ import javafx.stage.Stage;
 import javafx.scene.control.CheckBox;
 import javafx.scene.control.Separator;
 
-public class MainController { 
+public class MainController implements PlaybackObserver { 
 
     private final CommandManager commandManager = new CommandManager();
     private final TrackRepository trackRepository;
     private final PlaybackEngine playbackEngine;
     private final PlaylistRepository playlistRepository;
+    private final Map<Integer, Integer> displayedPlayCounts = new HashMap<>();
+    private final Map<Integer, Integer> displayedPlaylistPlayCounts = new HashMap<>();
 
     private final ObservableList<Track> tracks = FXCollections.observableArrayList();
     private final ObservableList<Playlist> playlists = FXCollections.observableArrayList();
@@ -55,6 +62,10 @@ public class MainController {
     private ListView<Playlist> playlistListView;
     @FXML
     private ListView<Track> playlistTracksListView;
+    @FXML
+    private ListView<Track> mostPlayedTracksListView;
+    @FXML
+    private ListView<Playlist> mostPlayedPlaylistsListView;
     @FXML
     private Label detailsTitleLabel;
     @FXML
@@ -79,6 +90,8 @@ public class MainController {
         this.trackRepository = trackRepository;
         this.playlistRepository = playlistRepository;
         this.playbackEngine = playbackEngine;
+        this.playbackEngine.setTrackRepository(trackRepository);
+        this.playbackEngine.setPlaylistRepository(playlistRepository);
     }
 
     @FXML
@@ -128,9 +141,178 @@ public class MainController {
         playlistTracksListView.setCellFactory(listView -> new PlaylistTrackListCell());
         mediaPlayerUI.setController(this);
         playbackEngine.registerObserver(mediaPlayerUI);
+        playbackEngine.registerObserver(this);
         playbackEngine.notifyObservers();
         initializePlaylistSection();
         loadTracksFromDatabase();
+        initializeMostPlayedLists();
+    }
+
+    @Override
+    public void update(Track currentTrack, Playlist currentPlaylist, int currentTime, boolean isPlaying) {
+        boolean playCountChanged = syncDisplayedPlaylistPlayCount(currentPlaylist);
+
+        if (currentTrack != null) {
+            if (isPlaying) {
+                syncTrackPlayCount(currentTrack);
+            }
+
+            Integer displayedPlayCount = displayedPlayCounts.put(
+                currentTrack.getId(),
+                currentTrack.getPlayCount()
+            );
+
+            playCountChanged = playCountChanged
+                || displayedPlayCount == null
+                || displayedPlayCount.intValue() != currentTrack.getPlayCount();
+        }
+
+        if (!playCountChanged) {
+            return;
+        }
+
+        if (tracksListView != null) {
+            tracksListView.refresh();
+        }
+
+        if (playlistTracksListView != null) {
+            playlistTracksListView.refresh();
+        }
+
+        refreshMostPlayedLists();
+    }
+
+    private boolean syncDisplayedPlaylistPlayCount(Playlist currentPlaylist) {
+        if (currentPlaylist == null || currentPlaylist.getId() <= 0) {
+            return false;
+        }
+
+        playlists.stream()
+            .filter(playlist -> playlist.getId() == currentPlaylist.getId())
+            .forEach(playlist -> playlist.setPlayCount(currentPlaylist.getPlayCount()));
+
+        Integer displayedPlayCount = displayedPlaylistPlayCounts.put(
+            currentPlaylist.getId(),
+            currentPlaylist.getPlayCount()
+        );
+
+        return displayedPlayCount == null
+            || displayedPlayCount.intValue() != currentPlaylist.getPlayCount();
+    }
+
+    private void syncTrackPlayCount(Track currentTrack) {
+        tracks.stream()
+            .filter(track -> track.getId() == currentTrack.getId())
+            .forEach(track -> track.setPlayCount(currentTrack.getPlayCount()));
+
+        playlists.stream()
+            .flatMap(playlist -> playlist.getTracks().stream())
+            .filter(track -> track.getId() == currentTrack.getId())
+            .forEach(track -> track.setPlayCount(currentTrack.getPlayCount()));
+    }
+
+    private void initializeMostPlayedLists() {
+        tracks.addListener((ListChangeListener<Track>) change -> refreshMostPlayedLists());
+        playlists.addListener((ListChangeListener<Playlist>) change -> refreshMostPlayedLists());
+
+        mostPlayedTracksListView.setPlaceholder(new Label("Nessun brano disponibile"));
+        mostPlayedTracksListView.setCellFactory(listView -> new ListCell<Track>() {
+
+            private final Label trackLabel = new Label();
+            private final Region spacer = new Region();
+            private final Button playButton = new Button("▶");
+            private final HBox content = new HBox(16, trackLabel, spacer, playButton);
+
+            {
+                HBox.setHgrow(spacer, Priority.ALWAYS);
+                trackLabel.setMaxWidth(Double.MAX_VALUE);
+                playButton.visibleProperty().bind(hoverProperty());
+                playButton.managedProperty().bind(playButton.visibleProperty());
+                playButton.setOnAction(event -> playTrack(getItem()));
+            }
+
+            @Override
+            protected void updateItem(Track track, boolean empty) {
+                super.updateItem(track, empty);
+
+                if (empty || track == null) {
+                    setText(null);
+                    setGraphic(null);
+                    return;
+                }
+
+                String playCountText = track.getPlayCount() == 1 ? " ascolto" : " ascolti";
+                trackLabel.setText(
+                    track.getTitle() + " - " + track.getAuthor()
+                        + "   [" + track.getPlayCount() + playCountText + "]"
+                );
+                setText(null);
+                setGraphic(content);
+            }
+        });
+
+        mostPlayedPlaylistsListView.setPlaceholder(new Label("Nessuna playlist disponibile"));
+        mostPlayedPlaylistsListView.setCellFactory(listView -> new ListCell<Playlist>() {
+
+            private final Label playlistLabel = new Label();
+            private final Region spacer = new Region();
+            private final Button playButton = new Button("\u25B6");
+            private final HBox content = new HBox(16, playlistLabel, spacer, playButton);
+
+            {
+                HBox.setHgrow(spacer, Priority.ALWAYS);
+                playlistLabel.setMaxWidth(Double.MAX_VALUE);
+                playButton.visibleProperty().bind(hoverProperty());
+                playButton.managedProperty().bind(playButton.visibleProperty());
+                playButton.setOnAction(event -> handlePlayPlaylist(getItem()));
+            }
+
+            @Override
+            protected void updateItem(Playlist playlist, boolean empty) {
+                super.updateItem(playlist, empty);
+
+                if (empty || playlist == null) {
+                    setText(null);
+                    setGraphic(null);
+                    return;
+                }
+
+                String playCountText = getPlaylistPlayCount(playlist) == 1 ? " ascolto" : " ascolti";
+                playlistLabel.setText(
+                    playlist.getName() + "   [" + getPlaylistPlayCount(playlist) + playCountText + "]"
+                );
+                setText(null);
+                setGraphic(content);
+            }
+        });
+
+        refreshMostPlayedLists();
+    }
+
+    private void refreshMostPlayedLists() {
+        if (mostPlayedTracksListView == null || mostPlayedPlaylistsListView == null) {
+            return;
+        }
+
+        mostPlayedTracksListView.getItems().setAll(
+            tracks.stream()
+                .sorted(Comparator.<Track>comparingInt(Track::getPlayCount).reversed()
+                    .thenComparingInt(Track::getId))
+                .limit(10)
+                .toList()
+        );
+
+        mostPlayedPlaylistsListView.getItems().setAll(
+            playlists.stream()
+                .sorted(Comparator.<Playlist>comparingInt(this::getPlaylistPlayCount).reversed()
+                    .thenComparingInt(Playlist::getId))
+                .limit(10)
+                .toList()
+        );
+    }
+
+    private int getPlaylistPlayCount(Playlist playlist) {
+        return playlist.getPlayCount();
     }
 
     private void showTrackDetails(Track track) {
@@ -250,6 +432,7 @@ public class MainController {
             TextField lengthField = new TextField(String.valueOf(track.getLength()));
             TextField genreField = new TextField(track.getGenre());
             TextField yearField = new TextField(String.valueOf(track.getYear()));
+            TextField playCountField = new TextField(String.valueOf(track.getPlayCount()));
 
             CheckBox favouriteCheckBox = new CheckBox("Favourite");
             favouriteCheckBox.setSelected(track.hasTag(Tag.FAVOURITE));
@@ -268,6 +451,7 @@ public class MainController {
             form.addRow(2, new Label("Durata"), lengthField);
             form.addRow(3, new Label("Genere"), genreField);
             form.addRow(4, new Label("Anno"), yearField);
+            form.addRow(4, new Label("Numero di riproduzioni"), playCountField);
 
             form.add(new Separator(), 0, 5, 2, 1);
             
@@ -288,8 +472,9 @@ public class MainController {
                         authorField.getText(),
                         Integer.parseInt(lengthField.getText().trim()),
                         genreField.getText(),
-                        Integer.parseInt(yearField.getText().trim())
-                );
+                        Integer.parseInt(yearField.getText().trim()),
+                        Integer.parseInt(playCountField.getText().trim())   
+                    );
         
                 if (favouriteCheckBox.isSelected()) {
                     updatedTrack.addTag(Tag.FAVOURITE);
@@ -497,6 +682,7 @@ public class MainController {
         track.setGenre(updatedTrack.getGenre());
         track.setYear(updatedTrack.getYear());
         track.setTags(updatedTrack.getTags());
+        track.setPlayCount(updatedTrack.getPlayCount());
 
         int index = tracks.indexOf(track);
 
@@ -646,6 +832,7 @@ public class MainController {
         );
 
         playlistTracksListView.refresh();
+        refreshMostPlayedLists();
     }
 
     private void showPlaylistOperationAlert(String header, String content) {
@@ -907,6 +1094,11 @@ public class MainController {
 
         selectedPlaylist = playlist;
         playbackEngine.startPlaylist(selectedPlaylist);
+        syncDisplayedPlaylistPlayCount(selectedPlaylist);
+        if (playlistListView != null) {
+            playlistListView.refresh();
+        }
+        refreshMostPlayedLists();
 
         System.out.println("[MAIN CONTROLLER] INFO: Play requested for playlist: " + playlist.getName() + ".");
     }
@@ -950,6 +1142,7 @@ public class MainController {
             playlistRepository.delete(target.getId());
             playlistListView.getItems().remove(target);
             playlistListView.refresh();
+            refreshMostPlayedLists();
             playbackEngine.setCurrentTrack(null);
             playbackEngine.setCurrentPlaylist(null);
         }
@@ -994,6 +1187,7 @@ public class MainController {
             playlistRepository.update(playlist);
 
             playlistListView.refresh();
+            refreshMostPlayedLists();
         });
     }
 
@@ -1196,22 +1390,4 @@ public class MainController {
             }
         }
     }
-
-    /*
-    public void handleUpdatePlaylistName(Playlist p, String newName) {
-
-        // TO DO:
-        // Validare nuovo nome playlist
-
-        // TO DO:
-        // Aggiornare nome playlist
-
-        // TO DO:
-        // Salvare modifiche nel repository
-
-        // TO DO:
-        // Aggiornare GUI
-    }
-    */
-
 }

@@ -45,15 +45,25 @@
                   <ListView fx:id="tracksListView" layoutX="14.0" layoutY="52.0" prefHeight="480.0" prefWidth="195.0" AnchorPane.bottomAnchor="14.4" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.8" AnchorPane.topAnchor="52.0" />
                </children>
             </AnchorPane>
-               <ScrollPane>
-                  <content>
-                     <AnchorPane>
-                        <children>
-                           <Label text="View"/>
-                        </children>
-                     </AnchorPane>
-                  </content>
-               </ScrollPane>
+            <ScrollPane fitToHeight="true" fitToWidth="true" prefHeight="-1.0" prefWidth="-1.0">
+               <content>
+                  <VBox id="Content" spacing="14.0" style="-fx-padding: 14;">
+                     <children>
+                        <Label alignment="CENTER" font="$x1" text="Brani più ascoltati" textAlignment="CENTER" textFill="$x2" wrapText="false" />
+                        <ListView fx:id="mostPlayedTracksListView" VBox.vgrow="ALWAYS" />
+                        <Label alignment="CENTER" text="Playlist più ascoltate" textAlignment="CENTER" wrapText="false">
+                           <font>
+                              <Font size="18.0" fx:id="x11" />
+                           </font>
+                           <textFill>
+                              <Color red="0.624" green="0.624" blue="0.624" fx:id="x21" />
+                           </textFill>
+                        </Label>
+                        <ListView fx:id="mostPlayedPlaylistsListView" VBox.vgrow="ALWAYS" />
+                     </children>
+                  </VBox>
+               </content>
+            </ScrollPane>
             <AnchorPane>
                <children>
 
