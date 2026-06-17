@@ -1,5 +1,9 @@
 package com.musicmanager.model;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.Objects;
 
 public class Track {
@@ -10,6 +14,7 @@ public class Track {
     private int length;
     private String genre;
     private int year;
+    private Set<Tag> tags;
 
     public Track(int id, String title, String author, int length, String genre, int year) {
         this.id = id;
@@ -18,6 +23,7 @@ public class Track {
         this.length = length;
         this.genre = genre;
         this.year = year;
+        this.tags = new HashSet<>();
     }
 
     public int getId() {
@@ -69,6 +75,10 @@ public class Track {
         this.year = year;
     }
 
+    public void setTags(Set<Tag> tags) {
+        this.tags = new HashSet<>(tags);
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -81,5 +91,51 @@ public class Track {
     public int hashCode() {
         return Objects.hash(id);
     }
+
+    public void addTag(Tag tag) {
+        tags.add(tag);
+    }
+    
+    public void removeTag(Tag tag) {
+        tags.remove(tag);
+    }
+    
+    public boolean hasTag(Tag tag) {
+        return tags.contains(tag);
+    }
+    
+    public Set<Tag> getTags() {
+        return tags;
+    }
+
+/**
+ *Converte l'insieme dei tag in una stringa da salvare nel database.
+ * Ad esempio:
+ * FAVOURITE,EXPLICIT, NEW_RELEASE
+*/
+public String serializeTags() {
+    return tags.stream()
+               .map(Tag::name)
+               .collect(Collectors.joining(","));
+}
+
+/**
+ * Ricostruisce l'insieme dei tag a partire dalla stringa letta dal database.
+ * Ad esempio:
+ * FAVOURITE,EXPLICIT, NEW_RELEASE
+ */
+public void deserializeTags(String serializedTags) {
+
+    tags.clear();
+
+    if (serializedTags == null || serializedTags.isBlank()) {
+        return;
+    }
+
+    Arrays.stream(serializedTags.split(","))
+          .map(String::trim)
+          .map(Tag::valueOf)
+          .forEach(tags::add);
+}
 
 }

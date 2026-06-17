@@ -11,6 +11,8 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.paint.Color?>
 <?import javafx.scene.text.Font?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.CheckBox?>
 
 <VBox prefHeight="600.0" prefWidth="900.0" xmlns="http://javafx.com/javafx/26" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.musicmanager.controller.MainController">
    <children>
@@ -43,15 +45,15 @@
                   <ListView fx:id="tracksListView" layoutX="14.0" layoutY="52.0" prefHeight="480.0" prefWidth="195.0" AnchorPane.bottomAnchor="14.4" AnchorPane.leftAnchor="14.0" AnchorPane.rightAnchor="14.8" AnchorPane.topAnchor="52.0" />
                </children>
             </AnchorPane>
-            <ScrollPane prefHeight="-1.0" prefWidth="-1.0">
-               <content>
-                  <AnchorPane id="Content" minHeight="-1.0" minWidth="-1.0" prefHeight="545.0" prefWidth="430.0">
-                     <children>
-                        <Label alignment="CENTER" font="$x1" layoutX="14.0" layoutY="14.0" style="&#10;" text="View" textAlignment="CENTER" textFill="$x2" wrapText="false" />
-                     </children>
-                  </AnchorPane>
-               </content>
-            </ScrollPane>
+               <ScrollPane>
+                  <content>
+                     <AnchorPane>
+                        <children>
+                           <Label text="View"/>
+                        </children>
+                     </AnchorPane>
+                  </content>
+               </ScrollPane>
             <AnchorPane>
                <children>
 

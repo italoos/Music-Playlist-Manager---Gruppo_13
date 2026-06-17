@@ -84,7 +84,8 @@ public class DatabaseManager {
                         "author VARCHAR(255) NOT NULL, " +
                         "length INT NOT NULL, " +
                         "genre VARCHAR(100), " +
-                        "\"year\" INT" +
+                        "\"year\" INT, " +
+                        "tags VARCHAR(255)" +
                         ");";
 
         String playlists =
@@ -108,12 +109,31 @@ public class DatabaseManager {
                 stmt.execute(tracks);
                 stmt.execute(playlists);      
                 stmt.execute(playlistTracks); 
+                stmt.execute("ALTER TABLE Tracks " + "ADD COLUMN IF NOT EXISTS tags VARCHAR(255);"git );
+
+                ensureTagsColumnExists(conn);
+
                 System.out.println("[H2 DATABASE] INFO: Database initialized successfully.");
             }
         } catch (SQLException e) {
             System.err.println("[H2 DATABASE] ERROR: Database initialization failed: " + e.getMessage());
         }
 
+    }
+
+    /**
+     * Controlla esistenza della colonna Tags
+     * @param conn
+     * @throws SQLException
+     */
+    private void ensureTagsColumnExists(Connection conn) throws SQLException {
+
+        String sql =
+            "ALTER TABLE Tracks ADD COLUMN IF NOT EXISTS tags VARCHAR(255);";
+    
+        try (Statement stmt = conn.createStatement()) {
+            stmt.execute(sql);
+        }
     }
 
 }

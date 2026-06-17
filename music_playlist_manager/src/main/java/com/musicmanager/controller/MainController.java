@@ -11,6 +11,7 @@ import com.musicmanager.PlaylistGenerator;
 import com.musicmanager.PlaylistGeneratorFactory;
 import com.musicmanager.model.Playlist;
 import com.musicmanager.model.Track;
+import com.musicmanager.model.Tag;
 import com.musicmanager.repository.PlaylistRepository;
 import com.musicmanager.repository.PlaylistRepositoryImpl;
 import com.musicmanager.repository.TrackRepository;
@@ -23,6 +24,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonBar;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.CheckBox;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Dialog;
 import javafx.scene.control.Label;
@@ -36,6 +38,8 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.scene.control.CheckBox;
+import javafx.scene.control.Separator;
 
 public class MainController { 
 
@@ -86,6 +90,24 @@ public class MainController {
     @FXML
     private MediaPlayerUI mediaPlayerUI;
 
+
+    @FXML
+    private Label titleLabel;
+
+    @FXML
+    private Label authorLabel;
+
+    @FXML
+    private Label genreLabel;
+
+    @FXML
+    private Label yearLabel;
+
+    @FXML
+    private Label lengthLabel;
+
+
+
     @FXML
     private void loadPrimaryStage() throws IOException {
         App.setRoot("primary");
@@ -100,12 +122,29 @@ public class MainController {
         tracksListView.setPlaceholder(new Label("I tuoi brani musicali saranno visualizzati qui"));
         tracksListView.setItems(tracks);
         tracksListView.setCellFactory(listView -> new TrackListCell());
+
+        tracksListView.getSelectionModel().selectedItemProperty().addListener((obs, oldTrack, newTrack) -> showTrackDetails(newTrack));
+        
         playlistTracksListView.setCellFactory(listView -> new PlaylistTrackListCell());
         mediaPlayerUI.setController(this);
         playbackEngine.registerObserver(mediaPlayerUI);
         playbackEngine.notifyObservers();
         initializePlaylistSection();
         loadTracksFromDatabase();
+    }
+
+    private void showTrackDetails(Track track) {
+
+        if (track == null) {
+            return;
+        }
+    
+        titleLabel.setText("Titolo: " + track.getTitle());
+        authorLabel.setText("Autore: " + track.getAuthor());
+        genreLabel.setText("Genere: " + track.getGenre());
+        yearLabel.setText("Anno: " + track.getYear());
+        lengthLabel.setText("Durata: " + track.getLength() + " sec");
+    
     }
 
     /**
@@ -149,7 +188,22 @@ public class MainController {
                 return;
             }
 
-            trackLabel.setText(track.getTitle() + " - " + track.getAuthor() + "  (" + track.getGenre() + ", " + track.getYear() + ")");
+            StringBuilder tags = new StringBuilder();
+
+            if (track.hasTag(Tag.FAVOURITE)) {
+                tags.append(" ❤");
+            }
+
+            if (track.hasTag(Tag.EXPLICIT)) {
+                tags.append(" E");
+            }
+
+            if (track.hasTag(Tag.NEW_RELEASE)) {
+                tags.append(" N");
+            }
+
+            trackLabel.setText(track.getTitle() + " - " + track.getAuthor()+ " (" + track.getGenre() + ", " + track.getYear() + ")" + "\t" + tags);
+
             setText(null);
             setGraphic(content);
         }
@@ -197,6 +251,15 @@ public class MainController {
             TextField genreField = new TextField(track.getGenre());
             TextField yearField = new TextField(String.valueOf(track.getYear()));
 
+            CheckBox favouriteCheckBox = new CheckBox("Favourite");
+            favouriteCheckBox.setSelected(track.hasTag(Tag.FAVOURITE));
+
+            CheckBox explicitCheckBox = new CheckBox("Explicit");
+            explicitCheckBox.setSelected(track.hasTag(Tag.EXPLICIT));
+
+            CheckBox newReleaseCheckBox = new CheckBox("New Release");
+            newReleaseCheckBox.setSelected(track.hasTag(Tag.NEW_RELEASE));
+
             GridPane form = new GridPane();
             form.setHgap(10);
             form.setVgap(10);
@@ -206,6 +269,12 @@ public class MainController {
             form.addRow(3, new Label("Genere"), genreField);
             form.addRow(4, new Label("Anno"), yearField);
 
+            form.add(new Separator(), 0, 5, 2, 1);
+            
+            form.add(favouriteCheckBox, 0, 6, 2, 1);
+            form.add(explicitCheckBox, 0, 7, 2, 1);
+            form.add(newReleaseCheckBox, 0, 8, 2, 1);
+
             dialog.getDialogPane().setContent(form);
             dialog.setResultConverter(button -> {
                 if (button != saveButtonType) {
@@ -213,14 +282,28 @@ public class MainController {
                 }
 
                 try {
-                    return new Track(
-                            track.getId(),
-                            titleField.getText(),
-                            authorField.getText(),
-                            Integer.parseInt(lengthField.getText().trim()),
-                            genreField.getText(),
-                            Integer.parseInt(yearField.getText().trim())
-                    );
+                    Track updatedTrack = new Track(
+                        track.getId(),
+                        titleField.getText(),
+                        authorField.getText(),
+                        Integer.parseInt(lengthField.getText().trim()),
+                        genreField.getText(),
+                        Integer.parseInt(yearField.getText().trim())
+                );
+        
+                if (favouriteCheckBox.isSelected()) {
+                    updatedTrack.addTag(Tag.FAVOURITE);
+                }
+        
+                if (explicitCheckBox.isSelected()) {
+                    updatedTrack.addTag(Tag.EXPLICIT);
+                }
+        
+                if (newReleaseCheckBox.isSelected()) {
+                    updatedTrack.addTag(Tag.NEW_RELEASE);
+                }
+        
+                return updatedTrack;
                 } catch (NumberFormatException e) {
                     showInvalidTrackEditAlert();
                     return null;
@@ -413,6 +496,7 @@ public class MainController {
         track.setLength(updatedTrack.getLength());
         track.setGenre(updatedTrack.getGenre());
         track.setYear(updatedTrack.getYear());
+        track.setTags(updatedTrack.getTags());
 
         int index = tracks.indexOf(track);
 
