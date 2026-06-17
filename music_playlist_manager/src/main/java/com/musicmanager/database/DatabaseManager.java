@@ -85,7 +85,7 @@ public class DatabaseManager {
                         "length INT NOT NULL, " +
                         "genre VARCHAR(100), " +
                         "\"year\" INT, " +
-                        "tags VARCHAR(255)" +
+                        "tags VARCHAR(255), " +
                         "playCount INT DEFAULT 0 NOT NULL" +
                         ");";
 

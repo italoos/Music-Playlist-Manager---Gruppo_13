@@ -242,9 +242,23 @@ public class MainController implements PlaybackObserver {
                 }
 
                 String playCountText = track.getPlayCount() == 1 ? " ascolto" : " ascolti";
+                StringBuilder tags = new StringBuilder();
+
+                if (track.hasTag(Tag.FAVOURITE)) {
+                    tags.append(" ❤");
+                }
+
+                if (track.hasTag(Tag.EXPLICIT)) {
+                    tags.append(" E");
+                }
+
+                if (track.hasTag(Tag.NEW_RELEASE)) {
+                    tags.append(" N");
+                }
+                
                 trackLabel.setText(
                     track.getTitle() + " - " + track.getAuthor()
-                        + "   [" + track.getPlayCount() + playCountText + "]"
+                        + "   [" + track.getPlayCount() + playCountText + "]" + "\t" + tags
                 );
                 setText(null);
                 setGraphic(content);
@@ -432,7 +446,6 @@ public class MainController implements PlaybackObserver {
             TextField lengthField = new TextField(String.valueOf(track.getLength()));
             TextField genreField = new TextField(track.getGenre());
             TextField yearField = new TextField(String.valueOf(track.getYear()));
-            TextField playCountField = new TextField(String.valueOf(track.getPlayCount()));
 
             CheckBox favouriteCheckBox = new CheckBox("Favourite");
             favouriteCheckBox.setSelected(track.hasTag(Tag.FAVOURITE));
@@ -451,7 +464,6 @@ public class MainController implements PlaybackObserver {
             form.addRow(2, new Label("Durata"), lengthField);
             form.addRow(3, new Label("Genere"), genreField);
             form.addRow(4, new Label("Anno"), yearField);
-            form.addRow(4, new Label("Numero di riproduzioni"), playCountField);
 
             form.add(new Separator(), 0, 5, 2, 1);
             
@@ -473,7 +485,7 @@ public class MainController implements PlaybackObserver {
                         Integer.parseInt(lengthField.getText().trim()),
                         genreField.getText(),
                         Integer.parseInt(yearField.getText().trim()),
-                        Integer.parseInt(playCountField.getText().trim())   
+                        track.getPlayCount()
                     );
         
                 if (favouriteCheckBox.isSelected()) {
@@ -544,8 +556,22 @@ public class MainController implements PlaybackObserver {
                 return;
             }
 
+            StringBuilder tags = new StringBuilder();
+
+            if (track.hasTag(Tag.FAVOURITE)) {
+                tags.append(" ❤");
+            }
+
+            if (track.hasTag(Tag.EXPLICIT)) {
+                tags.append(" E");
+            }
+
+            if (track.hasTag(Tag.NEW_RELEASE)) {
+                tags.append(" N");
+            }
+
             trackLabel.setText(track.getTitle() + " - " + track.getAuthor()
-                    + "  (" + track.getGenre() + ", " + track.getYear() + ")");
+                    + "  (" + track.getGenre() + ", " + track.getYear() + ")" + "\t" + tags);
 
             setText(null);
             setGraphic(content);
@@ -676,13 +702,7 @@ public class MainController implements PlaybackObserver {
             return;
         }
 
-        track.setTitle(updatedTrack.getTitle());
-        track.setAuthor(updatedTrack.getAuthor());
-        track.setLength(updatedTrack.getLength());
-        track.setGenre(updatedTrack.getGenre());
-        track.setYear(updatedTrack.getYear());
-        track.setTags(updatedTrack.getTags());
-        track.setPlayCount(updatedTrack.getPlayCount());
+        copyTrackData(track, updatedTrack);
 
         int index = tracks.indexOf(track);
 
@@ -691,6 +711,7 @@ public class MainController implements PlaybackObserver {
         }
 
         trackRepository.update(track);
+        syncTrackCopies(track);
 
         if (selectedPlaylist != null && selectedPlaylist.getTracks().contains(track)) {
             refreshPlaylistDetailsUI();
@@ -702,6 +723,35 @@ public class MainController implements PlaybackObserver {
 
         System.out.println("[MAIN CONTROLLER] INFO: Track updated successfully (ID: " + track.getId() + ").");
 
+    }
+
+    private void syncTrackCopies(Track updatedTrack) {
+        playlists.stream()
+            .flatMap(playlist -> playlist.getTracks().stream())
+            .filter(track -> track.getId() == updatedTrack.getId())
+            .forEach(track -> copyTrackData(track, updatedTrack));
+
+        Playlist currentPlaylist = playbackEngine.getCurrentPlaylist();
+        if (currentPlaylist != null) {
+            currentPlaylist.getTracks().stream()
+                .filter(track -> track.getId() == updatedTrack.getId())
+                .forEach(track -> copyTrackData(track, updatedTrack));
+        }
+
+        Track currentTrack = playbackEngine.getCurrentTrack();
+        if (currentTrack != null && currentTrack.getId() == updatedTrack.getId()) {
+            copyTrackData(currentTrack, updatedTrack);
+        }
+    }
+
+    private void copyTrackData(Track target, Track source) {
+        target.setTitle(source.getTitle());
+        target.setAuthor(source.getAuthor());
+        target.setLength(source.getLength());
+        target.setGenre(source.getGenre());
+        target.setYear(source.getYear());
+        target.setTags(source.getTags());
+        target.setPlayCount(source.getPlayCount());
     }
 
     /**

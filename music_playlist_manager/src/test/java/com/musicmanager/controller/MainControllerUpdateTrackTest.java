@@ -171,6 +171,28 @@ class MainControllerUpdateTrackTest {
     /** Verifica che input non validi non modifichino né la traccia né il repository. */
 
     @Test
+    void handleUpdateTrackUpdatesTrackCopiesInsidePlaylists() throws ReflectiveOperationException {
+
+        Track playlistTrack = new Track(1, "Bad Guy", "Billie Eilish", 194, "Pop", 2019, 3);
+        Playlist playlist = new Playlist(1, "Preferiti", 0);
+        playlist.addTrack(playlistTrack);
+        controller.getPlaylists().add(playlist);
+        setControllerField("selectedPlaylist", playlist);
+
+        Track updatedTrack = new Track(1, "Ocean Eyes", "Billie Eilish", 180, "Alternative", 2016, 0);
+
+        controller.handleUpdateTrack(originalTrack, updatedTrack);
+
+        assertEquals("Ocean Eyes", playlistTrack.getTitle());
+        assertEquals("Billie Eilish", playlistTrack.getAuthor());
+        assertEquals(180, playlistTrack.getLength());
+        assertEquals("Alternative", playlistTrack.getGenre());
+        assertEquals(2016, playlistTrack.getYear());
+        assertEquals(0, playlistTrack.getPlayCount());
+
+    }
+
+    @Test
     void handleUpdateTrackWithInvalidInputDoesNotChangeTrackOrRepository() {
 
         controller.handleUpdateTrack(originalTrack, null);
