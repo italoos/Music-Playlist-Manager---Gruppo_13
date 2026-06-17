@@ -3,11 +3,11 @@ package com.musicmanager.controller;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 
-import com.musicmanager.PausedState;
-import com.musicmanager.PlaybackEngine;
-import com.musicmanager.SequentialStrategy;
 import com.musicmanager.model.Playlist;
 import com.musicmanager.model.Track;
+import com.musicmanager.model.playback.PausedState;
+import com.musicmanager.model.playback.PlaybackEngine;
+import com.musicmanager.model.playback.SequentialStrategy;
 import com.musicmanager.repository.PlaylistRepository;
 import com.musicmanager.repository.TrackRepository;
 

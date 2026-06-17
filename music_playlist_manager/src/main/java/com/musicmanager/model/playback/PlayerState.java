@@ -1,4 +1,4 @@
-package com.musicmanager;
+package com.musicmanager.model.playback;
 
 public interface PlayerState {
 

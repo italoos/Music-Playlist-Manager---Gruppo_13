@@ -1,4 +1,4 @@
-package com.musicmanager;
+package com.musicmanager.model.generator;
 
 import java.util.List;
 

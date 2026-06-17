@@ -1,8 +1,13 @@
-package com.musicmanager;
+package com.musicmanager.view;
 
 import com.musicmanager.controller.MainController;
 import com.musicmanager.model.Playlist;
 import com.musicmanager.model.Track;
+import com.musicmanager.model.playback.PlaybackObserver;
+import com.musicmanager.model.playback.PlaylistLoopStrategy;
+import com.musicmanager.model.playback.SequentialStrategy;
+import com.musicmanager.model.playback.ShuffleStrategy;
+import com.musicmanager.model.playback.TrackLoopStrategy;
 
 import javafx.animation.AnimationTimer;
 import javafx.geometry.Insets;

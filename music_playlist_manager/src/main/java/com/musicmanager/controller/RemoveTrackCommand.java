@@ -1,8 +1,8 @@
 package com.musicmanager.controller;
 
-import com.musicmanager.PlaybackEngine;
 import com.musicmanager.model.Playlist;
 import com.musicmanager.model.Track;
+import com.musicmanager.model.playback.PlaybackEngine;
 import com.musicmanager.repository.PlaylistRepository;
 import com.musicmanager.repository.TrackRepository;
 import javafx.collections.ObservableList;

@@ -3,9 +3,9 @@ package com.musicmanager.controller;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
-import com.musicmanager.PlaybackEngine;
 import com.musicmanager.model.Playlist;
 import com.musicmanager.model.Track;
+import com.musicmanager.model.playback.PlaybackEngine;
 import com.musicmanager.repository.PlaylistRepository;
 import com.musicmanager.repository.TrackRepository;
 

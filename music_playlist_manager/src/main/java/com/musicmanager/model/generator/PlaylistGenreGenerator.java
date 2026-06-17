@@ -1,16 +1,16 @@
-package com.musicmanager;
+package com.musicmanager.model.generator;
 
 import java.util.List;
 
 import com.musicmanager.model.Playlist;
 import com.musicmanager.model.Track;
 
-public class PlaylistYearGenerator implements PlaylistGenerator {
+public class PlaylistGenreGenerator implements PlaylistGenerator {
 
-    private final int year;
+    private final String genre;
 
-    public PlaylistYearGenerator(int year) {
-        this.year = year;
+    public PlaylistGenreGenerator(String genre) {
+        this.genre = genre;
     }
 
     @Override
@@ -19,7 +19,7 @@ public class PlaylistYearGenerator implements PlaylistGenerator {
         Playlist playlist = new Playlist(playlistName);
 
         for (Track track : tracks) {
-            if (track.getYear() == year) {
+            if (track.getGenre().equalsIgnoreCase(genre)) {
                 playlist.addTrack(track);
             }
         }

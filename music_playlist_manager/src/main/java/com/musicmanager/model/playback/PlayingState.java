@@ -1,21 +1,14 @@
-package com.musicmanager;
+package com.musicmanager.model.playback;
 
-public class PausedState implements PlayerState {
+public class PlayingState implements PlayerState {
 
     /**
-     * Fa ripartire la riproduzione del brano corrente.
+     * Non fa nulla perchè il brano è già in riproduzione.
      * @param engine Il motore di riproduzione.
      */
     @Override
     public void play(PlaybackEngine engine) {
-
-        if (engine.getCurrentTrack() == null) {
-            return;
-        }
-
-        engine.setState(new PlayingState());
-
-        engine.notifyObservers();
+        // già in riproduzione
     }
 
     /**
@@ -24,7 +17,10 @@ public class PausedState implements PlayerState {
      */
     @Override
     public void pause(PlaybackEngine engine) {
-        // già in pausa
+
+        engine.setState(new PausedState());
+
+        engine.notifyObservers();
     }
 
     /**

@@ -1,4 +1,4 @@
-package com.musicmanager.controller;
+package com.musicmanager.model.io;
 
 import java.io.BufferedReader;
 import java.io.FileReader;

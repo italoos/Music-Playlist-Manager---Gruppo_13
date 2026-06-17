@@ -1,4 +1,4 @@
-package com.musicmanager.controller;
+package com.musicmanager.model.io;
 
 import static org.junit.jupiter.api.Assertions.*;
 

@@ -1,4 +1,4 @@
-package com.musicmanager;
+package com.musicmanager.model.playback;
 
 import java.util.ArrayList;
 import java.util.Collections;

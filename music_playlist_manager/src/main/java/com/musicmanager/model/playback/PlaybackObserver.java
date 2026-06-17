@@ -1,4 +1,4 @@
-package com.musicmanager;
+package com.musicmanager.model.playback;
 
 import com.musicmanager.model.Playlist;
 import com.musicmanager.model.Track;

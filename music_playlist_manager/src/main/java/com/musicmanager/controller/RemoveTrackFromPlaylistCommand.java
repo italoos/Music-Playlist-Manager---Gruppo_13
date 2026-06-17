@@ -1,8 +1,8 @@
 package com.musicmanager.controller;
 
-import com.musicmanager.PlaybackEngine;
 import com.musicmanager.model.Playlist;
 import com.musicmanager.model.Track;
+import com.musicmanager.model.playback.PlaybackEngine;
 import com.musicmanager.repository.PlaylistRepository;
 
 /** Comando concreto che rimuove un brano musicale da una playlist. */

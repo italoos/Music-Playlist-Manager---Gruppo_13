@@ -1,4 +1,4 @@
-package com.musicmanager.controller;
+package com.musicmanager;
 
 import java.io.IOException;
 import javafx.application.Application;
@@ -31,7 +31,7 @@ public class App extends Application {
      * @param fxml Il nome del file FXML da caricare (senza estensione).
      * @throws IOException Se si verifica un errore durante il caricamento del file FXML.
      */
-    static void setRoot(String fxml) throws IOException {
+    public static void setRoot(String fxml) throws IOException {
         scene.setRoot(loadFXML(fxml));
     }
 
@@ -42,7 +42,7 @@ public class App extends Application {
      * @throws IOException Se si verifica un errore durante il caricamento del file FXML.
      */
     private static Parent loadFXML(String fxml) throws IOException {
-        FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource("/com/musicmanager/" + fxml + ".fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(App.class.getResource("/com/musicmanager/view/" + fxml + ".fxml"));
         return fxmlLoader.load();
     }
 

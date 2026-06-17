@@ -7,19 +7,21 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import com.musicmanager.MediaPlayerUI;
-import com.musicmanager.PlaybackEngine;
-import com.musicmanager.PlaybackObserver;
-import com.musicmanager.PlaybackStrategy;
-import com.musicmanager.PlaylistGenerator;
-import com.musicmanager.PlaylistGeneratorFactory;
+import com.musicmanager.App;
 import com.musicmanager.model.Playlist;
 import com.musicmanager.model.Track;
 import com.musicmanager.model.Tag;
+import com.musicmanager.model.generator.PlaylistGenerator;
+import com.musicmanager.model.generator.PlaylistGeneratorFactory;
+import com.musicmanager.model.io.TrackFileParser;
+import com.musicmanager.model.playback.PlaybackEngine;
+import com.musicmanager.model.playback.PlaybackObserver;
+import com.musicmanager.model.playback.PlaybackStrategy;
 import com.musicmanager.repository.PlaylistRepository;
 import com.musicmanager.repository.PlaylistRepositoryImpl;
 import com.musicmanager.repository.TrackRepository;
 import com.musicmanager.repository.TrackRepositoryImpl;
+import com.musicmanager.view.MediaPlayerUI;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
@@ -43,7 +45,6 @@ import javafx.scene.layout.Priority;
 import javafx.scene.layout.Region;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
-import javafx.scene.control.CheckBox;
 import javafx.scene.control.Separator;
 
 public class MainController implements PlaybackObserver { 
