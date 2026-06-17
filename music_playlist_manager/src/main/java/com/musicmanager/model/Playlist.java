@@ -61,7 +61,11 @@ public class Playlist {
         return this.playCount;
     }
 
+    public void setPlayCount(int playCount) {
+        this.playCount = playCount;
+    }
+
     public void incrementPlayCount() {
-        this.playCount ++;
+        this.playCount++;
     }
 }

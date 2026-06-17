@@ -29,7 +29,7 @@ public class PlaylistRepositoryImpl implements PlaylistRepository {
 
         // Query per inserire la playlist nella tabella principale
         String insertPlaylist =
-                "INSERT INTO Playlists (name) VALUES (?);";
+                "INSERT INTO Playlists (name, playCount) VALUES (?, ?);";
 
         // Query per associare i brani alla playlist nella tabella di giunzione
         String insertRelation =
@@ -49,12 +49,14 @@ public class PlaylistRepositoryImpl implements PlaylistRepository {
                          conn.prepareStatement(insertPlaylist, Statement.RETURN_GENERATED_KEYS)) {
 
                 ps.setString(1, playlist.getName());
+                ps.setInt(2, playlist.getPlayCount());
                 ps.executeUpdate();
 
                
                 try (ResultSet rs = ps.getGeneratedKeys()) {
                     if (!rs.next()) throw new SQLException("ID not generated");
                     playlistId = rs.getInt(1);
+                    playlist.setId(playlistId);
                 }
             }
 
@@ -94,7 +96,7 @@ public class PlaylistRepositoryImpl implements PlaylistRepository {
     public void update(Playlist playlist) {
 
         String updatePlaylist =
-                "UPDATE Playlists SET name = ? WHERE id = ?;";
+                "UPDATE Playlists SET name = ?, playCount = ? WHERE id = ?;";
 
         String deleteRelations =
                 "DELETE FROM Playlist_Tracks WHERE playlist_id = ?;";
@@ -112,7 +114,8 @@ public class PlaylistRepositoryImpl implements PlaylistRepository {
 
             try (PreparedStatement ps = conn.prepareStatement(updatePlaylist)) {
                 ps.setString(1, playlist.getName());
-                ps.setInt(2, playlistId);
+                ps.setInt(2, playlist.getPlayCount());
+                ps.setInt(3, playlistId);
 
                 int affected = ps.executeUpdate();
                 if (affected == 0) {
@@ -335,10 +338,15 @@ public class PlaylistRepositoryImpl implements PlaylistRepository {
        String sql =
         "SELECT p.id AS pid, p.name, p.playCount, " +
         "t.id AS tid, t.title, t.author, t.length, t.genre, t.\"year\", t.playCount " +
-        "FROM Playlists p " +
+        "FROM (" +
+        "   SELECT id, name, playCount " +
+        "   FROM Playlists " +
+        "   ORDER BY COALESCE(playCount, 0) DESC, id ASC " +
+        "   LIMIT 10" +
+        ") p " +
         "LEFT JOIN Playlist_Tracks pt ON p.id = pt.playlist_id " +
         "LEFT JOIN Tracks t ON t.id = pt.track_id " +
-        "ORDER BY p.playCount LIMIT 10;";
+        "ORDER BY COALESCE(p.playCount, 0) DESC, p.id ASC;";
 
         try {
             Connection conn = DatabaseManager.getInstance().getConnection();
@@ -382,7 +390,7 @@ public class PlaylistRepositoryImpl implements PlaylistRepository {
             return new ArrayList<>(map.values());
 
         } catch (SQLException e) {
-            System.err.println("[DB ERROR] findAll failed: " + e.getMessage());
+            System.err.println("[DB ERROR] findAllByPlayCount failed: " + e.getMessage());
             return new ArrayList<>();
         }
     }

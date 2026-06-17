@@ -4,10 +4,43 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import com.musicmanager.model.Playlist;
 import com.musicmanager.model.Track;
+import com.musicmanager.repository.PlaylistRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 class PlaybackEngineTest {
+
+    private static class InMemoryPlaylistRepository implements PlaylistRepository {
+        private Playlist lastUpdatedPlaylist;
+
+        @Override
+        public void save(Playlist playlist) {
+        }
+
+        @Override
+        public void update(Playlist playlist) {
+            lastUpdatedPlaylist = playlist;
+        }
+
+        @Override
+        public void delete(int playlistId) {
+        }
+
+        @Override
+        public Playlist findById(int playlistId) {
+            return null;
+        }
+
+        @Override
+        public java.util.List<Playlist> findAll() {
+            return java.util.List.of();
+        }
+
+        @Override
+        public java.util.List<Playlist> findAllByPlayCount() {
+            return java.util.List.of();
+        }
+    }
 
     @BeforeEach
     void resetEngine() {
@@ -16,6 +49,7 @@ class PlaybackEngineTest {
         engine.setCurrentPlaylist(null);
         engine.setState(new PausedState());
         engine.setStrategy(new SequentialStrategy());
+        engine.setPlaylistRepository(null);
     }
 
     @Test
@@ -153,5 +187,20 @@ class PlaybackEngineTest {
 
         assertSame(strategyFirstTrack, engine.getCurrentTrack());
         assertTrue(engine.isPlaying());
+    }
+
+    @Test
+    void startPlaylistIncrementsPlaylistPlayCount() {
+        PlaybackEngine engine = PlaybackEngine.getInstance();
+        InMemoryPlaylistRepository playlistRepository = new InMemoryPlaylistRepository();
+        Track track = new Track(1, "Only track", "Artist", 180, "Rock", 2020, 0);
+        Playlist playlist = new Playlist(1, "Test playlist", 4);
+        playlist.addTrack(track);
+        engine.setPlaylistRepository(playlistRepository);
+
+        engine.startPlaylist(playlist);
+
+        assertEquals(5, playlist.getPlayCount());
+        assertSame(playlist, playlistRepository.lastUpdatedPlaylist);
     }
 }

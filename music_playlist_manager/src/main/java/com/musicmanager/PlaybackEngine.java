@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.musicmanager.model.Playlist;
 import com.musicmanager.model.Track;
+import com.musicmanager.repository.PlaylistRepository;
 import com.musicmanager.repository.TrackRepository;
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
@@ -22,6 +23,7 @@ public class PlaybackEngine {
     private PlayerState currentState;
     private PlaybackStrategy strategy;
     private TrackRepository trackRepository;
+    private PlaylistRepository playlistRepository;
     private boolean trackNeedsPlayCountIncrement;
     
 
@@ -202,6 +204,10 @@ public class PlaybackEngine {
         }
 
         currentPlaylist = playlist;
+        currentPlaylist.incrementPlayCount();
+        if (playlistRepository != null && currentPlaylist.getId() > 0) {
+            playlistRepository.update(currentPlaylist);
+        }
         Track firstTrack = strategy.getFirst(playlist.getTracks(), preferredTrack);
         setCurrentTrack(firstTrack);
         play();
@@ -237,6 +243,10 @@ public class PlaybackEngine {
 
     public void setTrackRepository(TrackRepository trackRepository) {
         this.trackRepository = trackRepository;
+    }
+
+    public void setPlaylistRepository(PlaylistRepository playlistRepository) {
+        this.playlistRepository = playlistRepository;
     }
 
     /**
