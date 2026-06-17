@@ -25,29 +25,34 @@ public class TrackRepositoryImpl implements TrackRepository {
     @Override
     public List<Track> findAll() {
 
-        String sql = "SELECT id, title, author, length, genre, \"year\", playCount FROM Tracks ORDER BY id;";
+        String sql = "SELECT id, title, author, length, genre, \"year\", tags, playCount FROM Tracks ORDER BY id;";
         List<Track> tracks = new ArrayList<>();
 
         try {
             Connection conn = DatabaseManager.getInstance().getConnection();
             try (PreparedStatement pstmt = conn.prepareStatement(sql);
-                    ResultSet rs = pstmt.executeQuery()) {
+                ResultSet rs = pstmt.executeQuery()) {
 
                 while (rs.next()) {
-                    tracks.add(new Track(
-                            rs.getInt("id"),
-                            rs.getString("title"),
-                            rs.getString("author"),
-                            rs.getInt("length"),
-                            rs.getString("genre"),
-                            rs.getInt("year"),
-                            rs.getInt("playCount")                            
-                    ));
+                    Track track = new Track(
+                        rs.getInt("id"),
+                        rs.getString("title"),
+                        rs.getString("author"),
+                        rs.getInt("length"),
+                        rs.getString("genre"),
+                        rs.getInt("year"),
+                        rs.getInt("playCount")
+                    );                    
+                    track.deserializeTags(rs.getString("tags"));
+                
+                    tracks.add(track);
                 }
-
-                System.out.println("[H2 DATABASE] INFO: Tracks loaded successfully (" + tracks.size() + ").");
+                                                    
+                
             }
-        } catch (SQLException e) {
+
+            System.out.println("[H2 DATABASE] INFO: Tracks loaded successfully (" + tracks.size() + ").");
+        }catch (SQLException e) {
             System.err.println("[H2 DATABASE] ERROR: Tracks loading failed: " + e.getMessage());
         }
 
@@ -105,9 +110,9 @@ public class TrackRepositoryImpl implements TrackRepository {
         boolean useExplicitId = track.getId() > 0;
 
         if (useExplicitId) {
-            sql = "INSERT INTO Tracks (id, title, author, length, genre, \"year\", playCount) VALUES (?, ?, ?, ?, ?, ?, ?);";
+            sql = "INSERT INTO Tracks (id, title, author, length, genre, \"year\", tags, playCount) VALUES (?, ?, ?, ?, ?, ?, ?, ?);";
         } else {
-            sql = "INSERT INTO Tracks (title, author, length, genre, \"year\", playCount) VALUES (?, ?, ?, ?, ?, ?);";
+            sql = "INSERT INTO Tracks (title, author, length, genre, \"year\", tags, playCount) VALUES (?, ?, ?, ?, ?, ?, ?);";
         }
 
         try {
@@ -124,6 +129,7 @@ public class TrackRepositoryImpl implements TrackRepository {
                 pstmt.setInt(parameterIndex++, track.getLength());
                 pstmt.setString(parameterIndex++, track.getGenre());
                 pstmt.setInt(parameterIndex++, track.getYear());
+                pstmt.setString(parameterIndex++, track.serializeTags());
                 pstmt.setInt(parameterIndex++, track.getPlayCount());
 
                 pstmt.executeUpdate();
@@ -153,7 +159,7 @@ public class TrackRepositoryImpl implements TrackRepository {
     @Override
     public void update(Track track) {
 
-        String sql = "UPDATE Tracks SET title = ?, author = ?, length = ?, genre = ?, \"year\" = ?, playCount = ? WHERE id = ?;";
+        String sql = "UPDATE Tracks SET title = ?, author = ?, length = ?, genre = ?, \"year\" = ?, tags=?, playCount = ? WHERE id = ?;";
 
         try {
             Connection conn = DatabaseManager.getInstance().getConnection();
@@ -163,8 +169,9 @@ public class TrackRepositoryImpl implements TrackRepository {
                 pstmt.setInt(3, track.getLength());
                 pstmt.setString(4, track.getGenre());
                 pstmt.setInt(5, track.getYear());
-                pstmt.setInt(6, track.getPlayCount());
-                pstmt.setInt(7, track.getId());
+                pstmt.setString(6, track.serializeTags());
+                pstmt.setInt(7, track.getPlayCount());
+                pstmt.setInt(8, track.getId());
                 pstmt.executeUpdate();
                 System.out.println("[H2 DATABASE] INFO: Track updated successfully (ID: " + track.getId() + ").");
             }
