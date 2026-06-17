@@ -37,6 +37,7 @@ public class DatabaseManager {
 
     /**
      * Restituisce l’istanza di DatabaseManager, creandola se necessario.
+     * @return L'istanza singleton del gestore del database.
      */
 
     public static synchronized DatabaseManager getInstance() {
@@ -48,6 +49,8 @@ public class DatabaseManager {
 
     /**
      * Restituisce la connessione al database H2, creandola se necessario.
+     * @return La connessione attiva al database.
+     * @throws SQLException Se la connessione non puo essere aperta.
      */
 
     public Connection getConnection() throws SQLException {
@@ -85,7 +88,7 @@ public class DatabaseManager {
                         "length INT NOT NULL, " +
                         "genre VARCHAR(100), " +
                         "\"year\" INT, " +
-                        "tags VARCHAR(255)" +
+                        "tags VARCHAR(255), " +
                         "playCount INT DEFAULT 0 NOT NULL" +
                         ");";
 
@@ -140,9 +143,9 @@ public class DatabaseManager {
     }
 
     /**
-     * Controlla esistenza della colonna Tags
-     * @param conn
-     * @throws SQLException
+     * Garantisce l'esistenza della colonna dei tag nella tabella delle tracce.
+     * @param conn Connessione al database da usare per la modifica dello schema.
+     * @throws SQLException Se l'operazione sullo schema fallisce.
      */
     private void ensureTagsColumnExists(Connection conn) throws SQLException {
 

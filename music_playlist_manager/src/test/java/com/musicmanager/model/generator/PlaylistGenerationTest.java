@@ -1,4 +1,4 @@
-package com.musicmanager.controller;
+package com.musicmanager.model.generator;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -10,8 +10,6 @@ import com.musicmanager.model.Track;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import com.musicmanager.PlaylistGenerator;
-import com.musicmanager.PlaylistGeneratorFactory;
 /**
  * Classe di test JUnit per verificare il corretto funzionamento dei generatori 
  * di playlist automatici e della PlaylistGeneratorFactory.

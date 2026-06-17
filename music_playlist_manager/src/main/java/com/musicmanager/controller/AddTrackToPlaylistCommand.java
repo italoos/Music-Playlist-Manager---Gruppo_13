@@ -1,8 +1,8 @@
 package com.musicmanager.controller;
 
-import com.musicmanager.PlaybackEngine;
 import com.musicmanager.model.Playlist;
 import com.musicmanager.model.Track;
+import com.musicmanager.model.playback.PlaybackEngine;
 import com.musicmanager.repository.PlaylistRepository;
 
 /** Comando concreto che aggiunge un brano musicale a una playlist. */
@@ -13,6 +13,12 @@ public class AddTrackToPlaylistCommand implements Command {
     private final Track track;
     private final PlaylistRepository playlistRepository;
 
+    /**
+     * Crea il comando per aggiungere una traccia a una playlist.
+     * @param playlist Playlist da modificare.
+     * @param track Traccia da inserire nella playlist.
+     * @param playlistRepository Repository usato per salvare la modifica.
+     */
     public AddTrackToPlaylistCommand(Playlist playlist, Track track, PlaylistRepository playlistRepository) {
         this.playlist = playlist;
         this.track = track;

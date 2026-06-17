@@ -22,7 +22,7 @@ public class PlaylistRepositoryImpl implements PlaylistRepository {
     /**
      * Salva una nuova playlist nel database, inserendo prima il record della playlist 
      * e successivamente tutte le relazioni con le sue tracce musicali.
-     * * @param playlist L'oggetto Playlist da salvare nel database.
+     * @param playlist L'oggetto Playlist da salvare nel database.
      */
     @Override
     public void save(Playlist playlist) {
@@ -92,7 +92,8 @@ public class PlaylistRepositoryImpl implements PlaylistRepository {
         }
     }
 
-     @Override
+    /** {@inheritDoc} */
+    @Override
     public void update(Playlist playlist) {
 
         String updatePlaylist =
@@ -162,7 +163,7 @@ public class PlaylistRepositoryImpl implements PlaylistRepository {
     /**
      * Elimina definitivamente una playlist dal database rimuovendo prima i vincoli 
      * di chiave esterna (relazioni brani) e poi il record principale.
-     * * @param playlistId L'ID della playlist da eliminare.
+     * @param playlistId L'ID della playlist da eliminare.
      */
     @Override
     public void delete(int playlistId) {
@@ -209,7 +210,7 @@ public class PlaylistRepositoryImpl implements PlaylistRepository {
 
     /**
      * Ricerca una specifica playlist tramite il suo ID e carica l'oggetto completo di tutte le sue tracce.
-     * * @param playlistId L'ID della playlist da cercare.
+     * @param playlistId L'ID della playlist da cercare.
      * @return L'oggetto Playlist popolato con i suoi brani, oppure null se non viene trovata.
      */
     @Override
@@ -218,7 +219,7 @@ public class PlaylistRepositoryImpl implements PlaylistRepository {
         
         String sql =
                 "SELECT p.id, p.name, p.playCount, " +
-                "t.id AS tid, t.title, t.author, t.length, t.genre, t.\"year\", t.playCount " +
+                "t.id AS tid, t.title, t.author, t.length, t.genre, t.\"year\", t.tags, t.playCount " +
                 "FROM Playlists p " +
                 "LEFT JOIN Playlist_Tracks pt ON p.id = pt.playlist_id " +
                 "LEFT JOIN Tracks t ON t.id = pt.track_id " +
@@ -244,15 +245,17 @@ public class PlaylistRepositoryImpl implements PlaylistRepository {
                         int trackId = rs.getInt("tid");
                         // Se c'è una traccia valida associata, la mappa e la aggiunge alla playlist
                         if (trackId > 0) {
-                            playlist.addTrack(new Track(
-                                    trackId,
-                                    rs.getString("title"),
-                                    rs.getString("author"),
-                                    rs.getInt("length"),
-                                    rs.getString("genre"),
-                                    rs.getInt("year"),
-                                    rs.getInt("playCount")
-                            ));
+                            Track track = new Track(
+                                trackId,
+                                rs.getString("title"),
+                                rs.getString("author"),
+                                rs.getInt("length"),
+                                rs.getString("genre"),
+                                rs.getInt("year"),
+                                rs.getInt("playCount")
+                            );
+                            track.deserializeTags(rs.getString("tags"));
+                            playlist.addTrack(track);
                         }
                     }
                 }
@@ -268,14 +271,14 @@ public class PlaylistRepositoryImpl implements PlaylistRepository {
 
     /**
      * Recupera tutte le playlist memorizzate nel sistema, incluse le tracce associate a ciascuna di esse.
-     * * @return Una lista contenente tutte le Playlist caricate dal database.
+     * @return Una lista contenente tutte le Playlist caricate dal database.
      */
     @Override
     public List<Playlist> findAll() {
 
        String sql =
         "SELECT p.id AS pid, p.name, p.playCount, " +
-        "t.id AS tid, t.title, t.author, t.length, t.genre, t.\"year\", t.playCount " +
+        "t.id AS tid, t.title, t.author, t.length, t.genre, t.\"year\", t.tags, t.playCount " +
         "FROM Playlists p " +
         "LEFT JOIN Playlist_Tracks pt ON p.id = pt.playlist_id " +
         "LEFT JOIN Tracks t ON t.id = pt.track_id " +
@@ -307,15 +310,17 @@ public class PlaylistRepositoryImpl implements PlaylistRepository {
                     int trackId = rs.getInt("tid");
                     // Se la riga corrente del join contiene una traccia valida, la colleghiamo alla playlist corrispondente
                     if (trackId > 0) {
-                        playlist.addTrack(new Track(
-                                trackId,
-                                rs.getString("title"),
-                                rs.getString("author"),
-                                rs.getInt("length"),
-                                rs.getString("genre"),
-                                rs.getInt("year"),
-                                rs.getInt("playCount")
-                        ));
+                        Track track = new Track(
+                            trackId,
+                            rs.getString("title"),
+                            rs.getString("author"),
+                            rs.getInt("length"),
+                            rs.getString("genre"),
+                            rs.getInt("year"),
+                            rs.getInt("playCount")
+                        );
+                        track.deserializeTags(rs.getString("tags"));
+                        playlist.addTrack(track);
                     }
                 }
             }
@@ -330,14 +335,14 @@ public class PlaylistRepositoryImpl implements PlaylistRepository {
 
     /**
      * Recupera tutte le playlist memorizzate nel sistema, incluse le tracce associate a ciascuna di esse.
-     * * @return Una lista contenente tutte le Playlist caricate dal database.
+     * @return Una lista contenente le Playlist piu ascoltate caricate dal database.
      */
     @Override
     public List<Playlist> findAllByPlayCount() {
 
        String sql =
         "SELECT p.id AS pid, p.name, p.playCount, " +
-        "t.id AS tid, t.title, t.author, t.length, t.genre, t.\"year\", t.playCount " +
+        "t.id AS tid, t.title, t.author, t.length, t.genre, t.\"year\", t.tags, t.playCount " +
         "FROM (" +
         "   SELECT id, name, playCount " +
         "   FROM Playlists " +
@@ -374,15 +379,17 @@ public class PlaylistRepositoryImpl implements PlaylistRepository {
                     int trackId = rs.getInt("tid");
                     // Se la riga corrente del join contiene una traccia valida, la colleghiamo alla playlist corrispondente
                     if (trackId > 0) {
-                        playlist.addTrack(new Track(
-                                trackId,
-                                rs.getString("title"),
-                                rs.getString("author"),
-                                rs.getInt("length"),
-                                rs.getString("genre"),
-                                rs.getInt("year"),
-                                rs.getInt("playCount")
-                        ));
+                        Track track = new Track(
+                            trackId,
+                            rs.getString("title"),
+                            rs.getString("author"),
+                            rs.getInt("length"),
+                            rs.getString("genre"),
+                            rs.getInt("year"),
+                            rs.getInt("playCount")
+                        );
+                        track.deserializeTags(rs.getString("tags"));
+                        playlist.addTrack(track);
                     }
                 }
             }

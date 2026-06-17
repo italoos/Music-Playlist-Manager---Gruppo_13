@@ -1,4 +1,4 @@
-package com.musicmanager;
+package com.musicmanager.model;
 
 import com.musicmanager.model.Track;
 import com.musicmanager.model.Tag;

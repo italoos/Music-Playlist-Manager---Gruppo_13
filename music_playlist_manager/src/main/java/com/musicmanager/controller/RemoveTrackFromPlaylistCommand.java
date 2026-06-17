@@ -1,8 +1,8 @@
 package com.musicmanager.controller;
 
-import com.musicmanager.PlaybackEngine;
 import com.musicmanager.model.Playlist;
 import com.musicmanager.model.Track;
+import com.musicmanager.model.playback.PlaybackEngine;
 import com.musicmanager.repository.PlaylistRepository;
 
 /** Comando concreto che rimuove un brano musicale da una playlist. */
@@ -19,6 +19,12 @@ public class RemoveTrackFromPlaylistCommand implements Command {
 
     private boolean wasPlayingInThisPlaylist = false;
 
+    /**
+     * Crea il comando per rimuovere una traccia da una playlist.
+     * @param playlist Playlist da modificare.
+     * @param track Traccia da rimuovere.
+     * @param playlistRepository Repository usato per salvare la modifica.
+     */
     public RemoveTrackFromPlaylistCommand(Playlist playlist, Track track, PlaylistRepository playlistRepository) {
         this.playlist = playlist;
         this.track = track;

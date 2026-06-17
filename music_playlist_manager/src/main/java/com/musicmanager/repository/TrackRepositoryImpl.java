@@ -67,7 +67,7 @@ public class TrackRepositoryImpl implements TrackRepository {
     @Override
     public List<Track> findAllByPlayCount() {
 
-        String sql = "SELECT id, title, author, length, genre, \"year\", playCount FROM Tracks ORDER BY playCount DESC, id ASC LIMIT 10;";
+        String sql = "SELECT id, title, author, length, genre, \"year\", tags, playCount FROM Tracks ORDER BY playCount DESC, id ASC LIMIT 10;";
         List<Track> tracks = new ArrayList<>();
 
         try {
@@ -76,15 +76,18 @@ public class TrackRepositoryImpl implements TrackRepository {
                     ResultSet rs = pstmt.executeQuery()) {
 
                 while (rs.next()) {
-                    tracks.add(new Track(
-                            rs.getInt("id"),
-                            rs.getString("title"),
-                            rs.getString("author"),
-                            rs.getInt("length"),
-                            rs.getString("genre"),
-                            rs.getInt("year"),
-                            rs.getInt("playCount")                            
-                    ));
+                    Track track = new Track(
+                        rs.getInt("id"),
+                        rs.getString("title"),
+                        rs.getString("author"),
+                        rs.getInt("length"),
+                        rs.getString("genre"),
+                        rs.getInt("year"),
+                        rs.getInt("playCount")
+                    );                    
+                    track.deserializeTags(rs.getString("tags"));
+                
+                    tracks.add(track);
                 }
 
                 System.out.println("[H2 DATABASE] INFO: Tracks loaded successfully (" + tracks.size() + ").");
@@ -159,7 +162,7 @@ public class TrackRepositoryImpl implements TrackRepository {
     @Override
     public void update(Track track) {
 
-        String sql = "UPDATE Tracks SET title = ?, author = ?, length = ?, genre = ?, \"year\" = ?, tags=?, playCount = ? WHERE id = ?;";
+        String sql = "UPDATE Tracks SET title = ?, author = ?, length = ?, genre = ?, \"year\" = ?, tags = ?, playCount = ? WHERE id = ?;";
 
         try {
             Connection conn = DatabaseManager.getInstance().getConnection();

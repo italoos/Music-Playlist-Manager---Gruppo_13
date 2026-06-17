@@ -1,8 +1,11 @@
-package com.musicmanager;
+package com.musicmanager.model.playback;
 
 import java.util.List;
 import com.musicmanager.model.Track;
 
+/**
+ * Strategia che ripete sempre la traccia corrente.
+ */
 public class TrackLoopStrategy implements PlaybackStrategy {
 
     /**

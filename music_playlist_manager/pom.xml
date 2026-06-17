@@ -79,7 +79,7 @@
                 <artifactId>javafx-maven-plugin</artifactId>
                 <version>0.0.8</version>
                 <configuration>
-                    <mainClass>com.musicmanager/com.musicmanager.controller.App</mainClass>
+                    <mainClass>com.musicmanager/com.musicmanager.App</mainClass>
                 </configuration>
             </plugin>
 

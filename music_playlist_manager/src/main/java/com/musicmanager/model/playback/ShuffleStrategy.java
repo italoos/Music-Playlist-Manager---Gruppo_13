@@ -1,4 +1,4 @@
-package com.musicmanager;
+package com.musicmanager.model.playback;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -23,6 +23,9 @@ public class ShuffleStrategy implements PlaybackStrategy {
     private final Random random;
     private List<Track> shuffledTracks = new ArrayList<>();
 
+    /**
+     * Crea una strategia shuffle usando un generatore casuale standard.
+     */
     public ShuffleStrategy() {
         this(new Random());
     }
@@ -31,6 +34,12 @@ public class ShuffleStrategy implements PlaybackStrategy {
         this.random = random;
     }
 
+    /**
+     * Genera una coda casuale e restituisce la prima traccia da riprodurre.
+     * @param tracks Tracce disponibili nella playlist.
+     * @param preferredTrack Traccia da mettere in testa alla coda, se presente.
+     * @return La prima traccia della coda shuffle, oppure null se la playlist e vuota.
+     */
     @Override
     public Track getFirst(List<Track> tracks, Track preferredTrack) {
         shuffledTracks = new ArrayList<>(tracks);
